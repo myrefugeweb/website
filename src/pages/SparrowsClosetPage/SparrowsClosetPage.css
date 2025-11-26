@@ -1,0 +1,202 @@
+.sparrows-closet-page {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.sparrows-closet-main {
+  width: 100%;
+  padding-top: 80px;
+}
+
+.sparrows-closet-hero {
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #931818 0%, #7a1212 50%, #5f0e0e 100%);
+  color: #FFFFFF;
+  position: relative;
+  overflow: hidden;
+}
+
+.sparrows-closet-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.sparrows-closet-hero__container {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.sparrows-closet-hero__title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+}
+
+.sparrows-closet-hero__description {
+  font-size: 1.25rem;
+  line-height: 1.75;
+  opacity: 0.95;
+}
+
+.sparrows-closet-hero__image {
+  width: 100%;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.sparrows-closet-info {
+  padding: 6rem 2rem;
+  background-color: #FFFFFF;
+}
+
+.sparrows-closet-info__container {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.sparrows-closet-info__title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #212121;
+  margin-bottom: 1.5rem;
+}
+
+.sparrows-closet-info__text {
+  font-size: 1.125rem;
+  line-height: 1.75;
+  color: #424242;
+  margin-bottom: 1.5rem;
+}
+
+.sparrows-closet-info__image {
+  width: 100%;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.sparrows-closet-impact {
+  padding: 6rem 2rem;
+  background-color: #FAFAFA;
+}
+
+.sparrows-closet-impact__container {
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.sparrows-closet-impact__title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #212121;
+  margin-bottom: 3rem;
+}
+
+.sparrows-closet-impact__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.sparrows-closet-stat {
+  text-align: center;
+}
+
+.sparrows-closet-stat__value {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #931818;
+  margin-bottom: 0.5rem;
+}
+
+.sparrows-closet-stat__label {
+  font-size: 1.125rem;
+  color: #424242;
+}
+
+.sparrows-closet-cta {
+  padding: 6rem 2rem;
+  background: linear-gradient(135deg, #931818 0%, #7a1212 50%, #5f0e0e 100%);
+  color: #FFFFFF;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.sparrows-closet-cta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 70% 50%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.sparrows-closet-cta__container {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.sparrows-closet-cta__title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.sparrows-closet-cta__text {
+  font-size: 1.25rem;
+  line-height: 1.75;
+  margin-bottom: 2rem;
+  opacity: 0.95;
+}
+
+@media (max-width: 1024px) {
+  .sparrows-closet-hero__container,
+  .sparrows-closet-info__container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .sparrows-closet-hero__title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .sparrows-closet-hero,
+  .sparrows-closet-info,
+  .sparrows-closet-impact,
+  .sparrows-closet-cta {
+    padding: 4rem 1rem;
+  }
+
+  .sparrows-closet-hero__title {
+    font-size: 2rem;
+  }
+}
+

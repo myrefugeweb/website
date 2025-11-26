@@ -1,0 +1,15 @@
+.home-page {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.home-page main {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.home-page main > section,
+.home-page main > div {
+  width: 100%;
+}
+

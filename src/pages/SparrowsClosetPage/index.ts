@@ -1,0 +1,2 @@
+export { SparrowsClosetPage } from './SparrowsClosetPage';
+

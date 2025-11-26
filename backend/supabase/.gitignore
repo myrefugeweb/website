@@ -1,0 +1,9 @@
+# Supabase CLI
+.branches
+.temp
+db/.branches
+db/.temp
+
+# Local development
+.env.local
+

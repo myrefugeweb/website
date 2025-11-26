@@ -1,0 +1,56 @@
+.dynamic-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 1rem;
+}
+
+.dynamic-image:hover {
+  transform: scale(1.02);
+  filter: brightness(1.05);
+}
+
+.dynamic-image--loading,
+.dynamic-image--placeholder {
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: linear-gradient(135deg, #F0F0F0 0%, #E8E8E8 50%, #F5F5F5 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9E9E9E;
+  border-radius: 1rem;
+  position: relative;
+  overflow: hidden;
+  font-weight: 500;
+  font-size: 0.9375rem;
+}
+
+.dynamic-image--loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.dynamic-image__placeholder {
+  font-size: 0.875rem;
+  position: relative;
+  z-index: 1;
+}
+

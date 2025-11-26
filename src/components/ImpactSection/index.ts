@@ -1,0 +1,2 @@
+export { ImpactSection } from './ImpactSection';
+

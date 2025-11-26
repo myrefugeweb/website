@@ -1,0 +1,112 @@
+.stats-section {
+  padding: 4rem 2rem;
+  background: #FFFFFF;
+  position: relative;
+  z-index: 2;
+}
+
+.stats-section__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  align-items: center;
+  position: relative;
+}
+
+.stats-section__stat {
+  text-align: center;
+  position: relative;
+  padding: 2rem 1rem;
+}
+
+.stats-section__icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.stats-section__value {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 800;
+  color: #FF8C00;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.stats-section__label {
+  font-size: 1rem;
+  color: #333333;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stats-section__divider {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(to bottom, transparent, #E0E0E0, transparent);
+}
+
+.stats-section__stat:last-child .stats-section__divider {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .stats-section__container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3rem;
+  }
+
+  .stats-section__divider {
+    display: none;
+  }
+
+  .stats-section__stat:nth-child(2)::after {
+    content: '';
+    position: absolute;
+    bottom: -1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #E0E0E0, transparent);
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-section {
+    padding: 3rem 1.5rem;
+  }
+
+  .stats-section__container {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .stats-section__stat {
+    padding: 1.5rem 1rem;
+  }
+
+  .stats-section__stat::after {
+    content: '';
+    position: absolute;
+    bottom: -1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #E0E0E0, transparent);
+  }
+
+  .stats-section__stat:last-child::after {
+    display: none;
+  }
+}
+

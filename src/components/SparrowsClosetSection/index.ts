@@ -1,0 +1,2 @@
+export { SparrowsClosetSection } from './SparrowsClosetSection';
+
