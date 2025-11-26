@@ -68,10 +68,53 @@ CREATE POLICY "Page views are insertable by anyone" ON page_views
 ALTER TABLE page_views ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
+-- FIX STORAGE BUCKET POLICIES (for image uploads)
+-- ============================================
+
+-- Drop existing storage policies
+DROP POLICY IF EXISTS "Allow authenticated users to upload images" ON storage.objects;
+DROP POLICY IF EXISTS "Allow authenticated users to update images" ON storage.objects;
+DROP POLICY IF EXISTS "Allow authenticated users to delete images" ON storage.objects;
+DROP POLICY IF EXISTS "Allow public to read images" ON storage.objects;
+
+-- Allow authenticated users to upload to images bucket
+CREATE POLICY "Allow authenticated users to upload images" ON storage.objects
+  FOR INSERT 
+  WITH CHECK (
+    bucket_id = 'images' AND
+    auth.uid() IS NOT NULL
+  );
+
+-- Allow authenticated users to update their uploaded images
+CREATE POLICY "Allow authenticated users to update images" ON storage.objects
+  FOR UPDATE 
+  USING (
+    bucket_id = 'images' AND
+    auth.uid() IS NOT NULL
+  )
+  WITH CHECK (
+    bucket_id = 'images' AND
+    auth.uid() IS NOT NULL
+  );
+
+-- Allow authenticated users to delete images
+CREATE POLICY "Allow authenticated users to delete images" ON storage.objects
+  FOR DELETE 
+  USING (
+    bucket_id = 'images' AND
+    auth.uid() IS NOT NULL
+  );
+
+-- Allow public to read images (so they can be displayed on the site)
+CREATE POLICY "Allow public to read images" ON storage.objects
+  FOR SELECT 
+  USING (bucket_id = 'images');
+
+-- ============================================
 -- VERIFY POLICIES
 -- ============================================
 
--- Check that policies exist
+-- Check that database policies exist
 SELECT 
   schemaname,
   tablename,
@@ -84,4 +127,18 @@ SELECT
 FROM pg_policies 
 WHERE tablename IN ('images', 'unique_visitors', 'analytics_events', 'page_views')
 ORDER BY tablename, policyname;
+
+-- Check that storage policies exist
+SELECT 
+  schemaname,
+  tablename,
+  policyname,
+  permissive,
+  roles,
+  cmd,
+  qual,
+  with_check
+FROM pg_policies 
+WHERE tablename = 'objects' AND schemaname = 'storage'
+ORDER BY policyname;
 
