@@ -18,26 +18,46 @@ export const AdminDashboard: React.FC = () => {
   const [activeSiteTab, setActiveSiteTab] = useState<SiteTab>('my-refuge');
   const [selectedSection, setSelectedSection] = useState<SectionType>('hero');
   const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const { userRole, isSuperAdmin: isSuperAdminRole, loading: roleLoading } = useUserRole();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate('/admin');
-      } else {
-        setUser(session.user);
+    const loadUser = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setUser(session.user);
+        }
+      } catch (error) {
+        console.error('Error loading user:', error);
+      } finally {
+        setLoading(false);
       }
     };
-    checkAuth();
-  }, [navigate]);
+
+    loadUser();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setUser(session.user);
+      } else {
+        // Session expired or logged out, ProtectedRoute will handle redirect
+        setUser(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/admin');
   };
 
-  if (!user || roleLoading) {
+  if (loading || roleLoading || !user) {
     return <div className="admin-dashboard__loading">Loading...</div>;
   }
 
