@@ -31,6 +31,28 @@
   gap: 1.5rem;
 }
 
+.hero__org-name {
+  margin-bottom: 0.75rem;
+}
+
+.hero__org-name-logo {
+  height: auto;
+  width: auto;
+  max-width: 200px;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.hero__org-name-logo:hover {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .hero__org-name-logo {
+    max-width: 150px;
+  }
+}
+
 .hero__title {
   font-size: clamp(2.5rem, 5vw, 4.5rem);
   font-weight: 800;
@@ -103,12 +125,16 @@
 
 .hero__image-wrapper {
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
   position: relative;
   border-radius: 0.5rem;
-  overflow: hidden;
+  overflow: visible;
+  background: transparent;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
 }
 
 .hero__image-wrapper:hover {
@@ -122,17 +148,20 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 140, 0, 0.1) 0%, rgba(0, 125, 255, 0.1) 100%);
+  background: transparent;
   pointer-events: none;
   z-index: 1;
 }
 
 .hero__dynamic-image {
   width: 100%;
-  height: auto;
+  height: auto !important;
+  max-width: 100%;
   display: block;
-  object-fit: cover;
+  object-fit: contain !important;
   border-radius: 0.5rem;
+  background: transparent;
+  aspect-ratio: auto !important;
 }
 
 @media (max-width: 1024px) {
@@ -143,8 +172,12 @@
 
   .hero__visual {
     order: -1;
-    max-width: 500px;
+    max-width: 100%;
     margin: 0 auto;
+  }
+
+  .hero__image-wrapper {
+    max-width: 100%;
   }
 
   .hero__description {
@@ -226,12 +259,28 @@
 
 @media (max-width: 768px) {
   .hero {
-    padding: 6rem 1.5rem 3rem;
+    padding: 6rem 1rem 3rem;
     min-height: auto;
   }
 
   .hero__content {
     gap: 2.5rem;
+  }
+
+  .hero__visual {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .hero__image-wrapper {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .hero__dynamic-image {
+    width: 100%;
+    height: auto;
   }
 
   .hero__actions {
@@ -247,12 +296,18 @@
     min-height: 70vh;
   }
 
+  .hero--layout-2 .hero__org-name-logo {
+    filter: brightness(1.1);
+  }
+
   .hero--layout-3 .hero__content {
     grid-template-columns: 1fr;
   }
 
   .hero--layout-3 .hero__visual {
     order: -1;
+    width: 100%;
+    max-width: 100%;
   }
 }
 

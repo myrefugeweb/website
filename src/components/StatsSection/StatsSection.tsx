@@ -5,12 +5,7 @@ import './StatsSection.css';
 export const StatsSection: React.FC = () => {
   const stats = [
     {
-      value: '$1M+',
-      label: 'Fund Raised',
-      icon: '💰'
-    },
-    {
-      value: '500+',
+      value: '20+',
       label: 'Dedicated Volunteers',
       icon: '👥'
     },

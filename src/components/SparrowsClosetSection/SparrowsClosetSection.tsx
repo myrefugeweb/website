@@ -30,7 +30,7 @@ export const SparrowsClosetSection: React.FC = () => {
             Providing free clothing and hygiene items to families in need.
           </p>
           <Link to="/sparrows-closet">
-            <Button variant="primary" size="lg">
+            <Button variant="primary" size="lg" className="sparrows-closet__button">
               Learn How to Help
             </Button>
           </Link>

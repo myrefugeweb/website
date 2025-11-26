@@ -5,6 +5,7 @@ import { DynamicImage } from '../DynamicImage';
 import { DONATION_URL } from '../../constants/donation';
 import { useSectionLayout } from '../../hooks/useSectionLayout';
 import { useEventTracking } from '../../hooks/useAnalytics';
+import SunLogoText from '../../assets/sunLogowText.svg';
 import './HeroSection.css';
 
 export const HeroSection: React.FC = () => {
@@ -23,6 +24,14 @@ export const HeroSection: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
+              <motion.div
+                className="hero__org-name"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+              >
+                <img src={SunLogoText} alt="My Refuge" className="hero__org-name-logo" />
+              </motion.div>
               <motion.h1
                 className="hero__title"
                 initial={{ opacity: 0, y: 20 }}
@@ -104,6 +113,14 @@ export const HeroSection: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
+            <motion.div
+              className="hero__org-name"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+            >
+              <img src={SunLogoText} alt="My Refuge" className="hero__org-name-logo" />
+            </motion.div>
             <motion.h1
               className="hero__title"
               initial={{ opacity: 0, y: 20 }}
@@ -178,6 +195,14 @@ export const HeroSection: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
+              <motion.div
+                className="hero__org-name"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+              >
+                <img src={SunLogoText} alt="My Refuge" className="hero__org-name-logo" />
+              </motion.div>
               <motion.h1
                 className="hero__title"
                 initial={{ opacity: 0, y: 20 }}
