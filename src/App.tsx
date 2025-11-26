@@ -14,8 +14,11 @@ const AnalyticsWrapper: React.FC<{ children: React.ReactNode }> = ({ children })
 
 function App() {
   try {
+    // Get base path from Vite config or default to '/'
+    const basePath = import.meta.env.BASE_URL || '/';
+    
     return (
-      <BrowserRouter>
+      <BrowserRouter basename={basePath}>
         <AnalyticsWrapper>
           <Routes>
             <Route path="/" element={<HomePage />} />
