@@ -44,6 +44,8 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: './dist'
+      
+      # CNAME file is automatically included from public/CNAME during build
 
   deploy:
     environment:

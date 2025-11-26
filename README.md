@@ -144,16 +144,21 @@ The admin login is accessible via the "login" link in the footer. After authenti
 
 ### GitHub Pages
 
-This project is configured for automatic deployment to GitHub Pages using GitHub Actions.
+This project is configured for automatic deployment to GitHub Pages using GitHub Actions with a custom domain.
+
+**Production URL**: https://www.my-refuge.org
+
+**Setup Steps:**
 
 1. **Push to GitHub**: Follow the instructions in `docs/GITHUB_PAGES_SETUP.md` to authenticate and push your code
 2. **Enable GitHub Pages**: Go to repository Settings → Pages → Source: GitHub Actions
 3. **Add Secrets**: Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as repository secrets
-4. **Deploy**: The workflow will automatically build and deploy on every push to `main`
+4. **Configure Custom Domain**: See `docs/CUSTOM_DOMAIN_SETUP.md` for DNS configuration
+5. **Deploy**: The workflow will automatically build and deploy on every push to `main`
 
-Your site will be available at: `https://myrefugeweb.github.io/website/`
-
-See `docs/GITHUB_PAGES_SETUP.md` for detailed setup instructions.
+**Documentation:**
+- `docs/GITHUB_PAGES_SETUP.md` - Initial GitHub Pages setup
+- `docs/CUSTOM_DOMAIN_SETUP.md` - Custom domain (www.my-refuge.org) configuration
 
 ### Other Platforms
 
