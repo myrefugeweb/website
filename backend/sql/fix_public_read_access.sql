@@ -31,6 +31,8 @@ CREATE POLICY "Unique visitors are updatable by anyone" ON unique_visitors
   USING (true);
 
 -- Allow public SELECT for tracking (needed for analytics)
+-- Drop the authenticated-only policy first to avoid conflicts
+DROP POLICY IF EXISTS "Unique visitors are viewable by authenticated users" ON unique_visitors;
 DROP POLICY IF EXISTS "Unique visitors are viewable by everyone" ON unique_visitors;
 CREATE POLICY "Unique visitors are viewable by everyone" ON unique_visitors
   FOR SELECT 
