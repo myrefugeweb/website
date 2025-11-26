@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../Button';
 import { DONATION_URL } from '../../constants/donation';
 import { scrollToSection } from '../../utils/scrollToSection';
+import refugeLogo from '../../assets/refugeLogo.svg';
 import './Header.css';
 
 export const Header: React.FC = () => {
@@ -54,7 +55,9 @@ export const Header: React.FC = () => {
     >
       <nav className="header__nav">
         <div className="header__logo">
-          <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>My Refuge</Link>
+          <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>
+            <img src={refugeLogo} alt="My Refuge" className="header__logo-img" />
+          </Link>
         </div>
         <ul className={`header__links ${isMobileMenuOpen ? 'header__links--open' : ''}`}>
           <li>
