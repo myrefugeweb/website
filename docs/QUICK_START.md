@@ -11,13 +11,13 @@ npm install
 
 **On Windows (PowerShell):**
 ```powershell
-.\setup-env.ps1
+.\scripts\setup-env.ps1
 ```
 
 **On Mac/Linux:**
 ```bash
-chmod +x setup-env.sh
-./setup-env.sh
+chmod +x scripts/setup-env.sh
+./scripts/setup-env.sh
 ```
 
 **Or manually:**

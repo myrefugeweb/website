@@ -23,21 +23,19 @@ A modern, professional landing page for My Refuge, a non-profit organization hel
 ## Project Structure
 
 ```
-src/
-├── components/          # Reusable UI components
-│   ├── Button/         # Button component with variants
-│   ├── Card/           # Card component
-│   ├── Header/         # Navigation header
-│   ├── Footer/         # Footer component
-│   └── [Sections]/     # Landing page sections
-├── pages/              # Page components
-│   ├── HomePage/       # Main landing page
-│   ├── AdminLogin/     # Admin authentication
-│   └── AdminDashboard/ # Admin content management
-├── design-system/      # Design tokens and theme
-├── lib/                # Utilities and configurations
-│   └── supabase.ts    # Supabase client setup
-└── styles/             # Global styles
+my-refuge/
+├── src/                # Source code
+│   ├── components/     # Reusable UI components
+│   ├── pages/          # Page components
+│   ├── design-system/  # Design tokens and theme
+│   ├── lib/            # Utilities and configurations
+│   └── styles/         # Global styles
+├── backend/            # Backend configuration
+│   ├── supabase/       # Supabase CLI configuration and migrations
+│   └── sql/            # SQL setup scripts
+├── docs/               # Documentation
+├── scripts/             # Setup and utility scripts
+└── public/             # Static assets
 ```
 
 ## Getting Started
@@ -59,11 +57,11 @@ src/
    **Option 1: Use the setup script (Recommended)**
    ```bash
    # On Windows (PowerShell)
-   .\setup-env.ps1
+   .\scripts\setup-env.ps1
    
    # On Mac/Linux
-   chmod +x setup-env.sh
-   ./setup-env.sh
+   chmod +x scripts/setup-env.sh
+   ./scripts/setup-env.sh
    ```
 
    **Option 2: Manual setup**
@@ -75,7 +73,7 @@ src/
    - `VITE_SUPABASE_URL` - Your Supabase project URL
    - `VITE_SUPABASE_ANON_KEY` - Your Supabase publishable/anon key
    
-   See `ENV_SETUP.md` for detailed instructions.
+   See `docs/ENV_SETUP.md` for detailed instructions.
 
 ### Development
 
@@ -100,8 +98,8 @@ npm run preview
 
 1. Create a Supabase project at [supabase.com](https://supabase.com)
 2. Get your project URL and anon key from **Settings → API** in your Supabase dashboard
-3. Set up your `.env` file (see `ENV_SETUP.md` for detailed instructions)
-4. Set up the following tables in Supabase (see `SUPABASE_SETUP.md` for full guide):
+3. Set up your `.env` file (see `docs/ENV_SETUP.md` for detailed instructions)
+4. Set up the following tables in Supabase (see `docs/SUPABASE_SETUP.md` for full guide):
 
 ### Database Schema
 
@@ -144,7 +142,22 @@ The admin login is accessible via the "login" link in the footer. After authenti
 
 ## Deployment
 
-This project can be deployed to GitHub Pages or any static hosting service. The frontend is static, while the backend functionality is handled by Supabase.
+### GitHub Pages
+
+This project is configured for automatic deployment to GitHub Pages using GitHub Actions.
+
+1. **Push to GitHub**: Follow the instructions in `docs/GITHUB_PAGES_SETUP.md` to authenticate and push your code
+2. **Enable GitHub Pages**: Go to repository Settings → Pages → Source: GitHub Actions
+3. **Add Secrets**: Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as repository secrets
+4. **Deploy**: The workflow will automatically build and deploy on every push to `main`
+
+Your site will be available at: `https://myrefugeweb.github.io/website/`
+
+See `docs/GITHUB_PAGES_SETUP.md` for detailed setup instructions.
+
+### Other Platforms
+
+This project can also be deployed to any static hosting service (Netlify, Vercel, etc.). The frontend is static, while the backend functionality is handled by Supabase.
 
 ## License
 
