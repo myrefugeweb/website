@@ -37,6 +37,19 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       
+      - name: Verify environment variables were used
+        run: |
+          echo "Checking if env vars were set during build..."
+          if [ -z "${{ secrets.VITE_SUPABASE_URL }}" ]; then
+            echo "❌ VITE_SUPABASE_URL secret is empty or not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
+            echo "❌ VITE_SUPABASE_ANON_KEY secret is empty or not set"
+            exit 1
+          fi
+          echo "✅ Both secrets are set"
+      
       - name: Setup Pages
         uses: actions/configure-pages@v4
       
