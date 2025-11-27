@@ -141,7 +141,8 @@ const SectionLayoutButton: React.FC<{ section: string; onSelect: () => void }> =
       }}
       title={`Change layout for ${section} section`}
     >
-      🎨 Layout
+      <span className="visual-editor__layout-button-icon">🎨</span>
+      <span className="visual-editor__layout-button-text">Layout</span>
     </button>
   );
 };

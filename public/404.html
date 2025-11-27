@@ -14,9 +14,16 @@
       var search = window.location.search;
       var hash = window.location.hash;
       
-      // Simple redirect to index.html - React Router will handle the path
-      // This works because React Router uses client-side routing
-      window.location.replace('/index.html' + path + search + hash);
+      // Prevent infinite loops - if we're already at index.html, just go to root
+      if (path.includes('index.html')) {
+        window.location.replace('/' + search + hash);
+        return;
+      }
+      
+      // Store the path in sessionStorage and redirect to index.html
+      // React Router will read it and navigate to the correct route
+      sessionStorage.setItem('redirectPath', path);
+      window.location.replace('/index.html' + search + hash);
     })();
   </script>
 </head>

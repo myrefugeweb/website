@@ -470,11 +470,32 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+    padding: 1rem;
+  }
+
+  .visual-editor__toolbar-right {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .visual-editor__toolbar-right .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .visual-editor__title {
+    font-size: 1.25rem;
+  }
+
+  .visual-editor__subtitle {
+    font-size: 0.8125rem;
   }
 
   .visual-editor__instructions {
     flex-direction: column;
     gap: 0.75rem;
+    padding: 1rem;
   }
 
   .visual-editor__modal {
@@ -490,6 +511,21 @@
 
   .visual-editor__layout-previews {
     grid-template-columns: 1fr;
+  }
+
+  .visual-editor__layout-button {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    border-radius: 1.5rem;
+    min-width: auto;
+  }
+
+  .visual-editor__layout-button-text {
+    display: none;
+  }
+
+  .visual-editor__layout-button-icon {
+    font-size: 1rem;
   }
 }
 

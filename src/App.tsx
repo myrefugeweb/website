@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { HomePage } from './pages/HomePage';
 import { SparrowsClosetPage } from './pages/SparrowsClosetPage';
@@ -16,27 +16,41 @@ const AnalyticsWrapper: React.FC<{ children: React.ReactNode }> = ({ children })
   return <>{children}</>;
 };
 
+// Component to handle 404 redirects
+const RedirectHandler: React.FC = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if we have a redirect path stored from 404.html
+    const redirectPath = sessionStorage.getItem('redirectPath');
+    if (redirectPath) {
+      // Clear it so we don't redirect again
+      sessionStorage.removeItem('redirectPath');
+      // Navigate to the stored path
+      navigate(redirectPath + window.location.search + window.location.hash, { replace: true });
+      return;
+    }
+
+    // Also handle direct /index.html access
+    const path = window.location.pathname;
+    if (path === '/index.html' || path.startsWith('/index.html/')) {
+      const actualPath = path.replace('/index.html', '') || '/';
+      navigate(actualPath + window.location.search + window.location.hash, { replace: true });
+    }
+  }, [navigate]);
+
+  return null;
+};
+
 function App() {
   try {
     // Get base path from Vite config or default to '/'
     const basePath = import.meta.env.BASE_URL || '/';
     
-    // Handle GitHub Pages 404 redirect
-    // When 404.html redirects to index.html with a path, we need to handle it
-    useEffect(() => {
-      // Check if we're at index.html with a path (from 404 redirect)
-      const path = window.location.pathname;
-      if (path.startsWith('/index.html')) {
-        // Extract the actual path from /index.html/path
-        const actualPath = path.replace('/index.html', '') || '/';
-        // Update the URL without reloading
-        window.history.replaceState({}, '', actualPath + window.location.search + window.location.hash);
-      }
-    }, []);
-    
     return (
       <BrowserRouter basename={basePath}>
         <AnalyticsWrapper>
+          <RedirectHandler />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/sparrows-closet" element={<SparrowsClosetPage />} />
