@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { HomePage } from './pages/HomePage';
 import { SparrowsClosetPage } from './pages/SparrowsClosetPage';
 import { PrivacyPage } from './pages/PrivacyPage';
@@ -19,6 +20,19 @@ function App() {
   try {
     // Get base path from Vite config or default to '/'
     const basePath = import.meta.env.BASE_URL || '/';
+    
+    // Handle GitHub Pages 404 redirect
+    // When 404.html redirects to index.html with a path, we need to handle it
+    useEffect(() => {
+      // Check if we're at index.html with a path (from 404 redirect)
+      const path = window.location.pathname;
+      if (path.startsWith('/index.html')) {
+        // Extract the actual path from /index.html/path
+        const actualPath = path.replace('/index.html', '') || '/';
+        // Update the URL without reloading
+        window.history.replaceState({}, '', actualPath + window.location.search + window.location.hash);
+      }
+    }, []);
     
     return (
       <BrowserRouter basename={basePath}>

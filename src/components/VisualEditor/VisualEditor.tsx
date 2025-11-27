@@ -325,7 +325,7 @@ export const VisualEditor: React.FC = () => {
       
       setSectionLayouts(prev => ({ ...prev, [section]: newLayout }));
       alert(`Layout updated for ${section} section!`);
-      // Reload page to show new layout
+      // Reload page to show new layout (layout changes require full reload)
       window.location.reload();
     } catch (error: any) {
       console.error('Error updating layout:', error);
@@ -621,8 +621,41 @@ export const VisualEditor: React.FC = () => {
         }
       }
 
-      // Reload the page to show updated image
-      window.location.reload();
+      // Update the image in the preview without reloading the page
+      // Find all image elements for this section and update their src
+      const imageElements = document.querySelectorAll(
+        `img[data-section="${targetSection}"], .dynamic-image--placeholder[data-section="${targetSection}"]`
+      );
+      
+      imageElements.forEach((element) => {
+        if (element instanceof HTMLImageElement) {
+          // Update existing image src
+          element.src = imageUrl + '?t=' + Date.now(); // Add cache bust
+          element.style.display = 'block';
+        } else if (element.classList.contains('dynamic-image--placeholder')) {
+          // Replace placeholder div with actual image
+          const img = document.createElement('img');
+          img.src = imageUrl + '?t=' + Date.now(); // Add cache bust
+          img.alt = `${targetSection} image`;
+          img.className = 'dynamic-image';
+          img.setAttribute('data-section', targetSection);
+          img.setAttribute('data-editable-type', 'image');
+          img.setAttribute('data-editable', 'true');
+          img.loading = 'lazy';
+          
+          // Replace the placeholder
+          if (element.parentNode) {
+            element.parentNode.replaceChild(img, element);
+          }
+        }
+      });
+      
+      // Close the modal
+      setSelectedElement(null);
+      setEditModalType(null);
+      
+      // Show success message
+      alert('Image updated successfully!');
     } catch (error: any) {
       console.error('Error saving image:', error);
       alert(`Error saving image: ${error.message}`);

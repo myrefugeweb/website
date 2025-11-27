@@ -1448,11 +1448,15 @@ const SuperAdminTab: React.FC = () => {
                 try {
                   // Create user with generated password
                   const password = generatedPassword || generatePassword();
+                  // Get production URL from environment or use current origin
+                  const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
+                  const redirectUrl = `${siteUrl}/admin`;
+                  
                   const { data: authData, error: authError } = await supabase.auth.signUp({
                     email: userFormData.email,
                     password: password,
                     options: {
-                      emailRedirectTo: undefined, // Disable email confirmation redirect
+                      emailRedirectTo: redirectUrl, // Redirect to admin login after email confirmation
                       data: {
                         must_change_password: true, // Flag to force password change on first login
                         temporary_password: password, // Store password temporarily (will be cleared after first login)

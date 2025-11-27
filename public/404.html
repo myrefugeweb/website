@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Refuge</title>
+  <script>
+    // GitHub Pages SPA routing fix
+    // When GitHub Pages can't find a file, it serves this 404.html
+    // We redirect to index.html and let React Router handle the routing
+    
+    (function() {
+      var path = window.location.pathname;
+      var search = window.location.search;
+      var hash = window.location.hash;
+      
+      // Simple redirect to index.html - React Router will handle the path
+      // This works because React Router uses client-side routing
+      window.location.replace('/index.html' + path + search + hash);
+    })();
+  </script>
+</head>
+<body>
+  <noscript>
+    <!-- Fallback for browsers without JavaScript -->
+    <meta http-equiv="refresh" content="0; url=/">
+    <p>Redirecting... <a href="/">Click here if you are not redirected.</a></p>
+  </noscript>
+</body>
+</html>
+
