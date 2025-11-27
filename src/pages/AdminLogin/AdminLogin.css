@@ -16,6 +16,20 @@
   width: 100%;
 }
 
+.admin-login__header {
+  margin-bottom: 1rem;
+}
+
+.admin-login__back-button {
+  color: #757575;
+  font-size: 0.875rem;
+  padding: 0.5rem 0;
+}
+
+.admin-login__back-button:hover {
+  color: #007DFF;
+}
+
 .admin-login__title {
   font-size: 2rem;
   font-weight: 700;

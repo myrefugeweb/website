@@ -147,6 +147,16 @@ export const AdminLogin: React.FC = () => {
         transition={{ duration: 0.5 }}
       >
         <Card variant="elevated" padding="lg" className="admin-login__card">
+          <div className="admin-login__header">
+            <Button
+              variant="text"
+              size="sm"
+              onClick={() => navigate('/')}
+              className="admin-login__back-button"
+            >
+              ← Back to Home
+            </Button>
+          </div>
           <h1 className="admin-login__title">Admin Login</h1>
           <p className="admin-login__subtitle">Sign in to access the admin dashboard</p>
           
