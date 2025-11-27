@@ -1297,6 +1297,9 @@ const SuperAdminTab: React.FC = () => {
   const [showUserForm, setShowUserForm] = useState(false);
   const [showRoleForm, setShowRoleForm] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState<string>('');
+  const [editingUser, setEditingUser] = useState<{ id: string; email: string; currentRoles: string[] } | null>(null);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [savingRoles, setSavingRoles] = useState(false);
   const [userFormData, setUserFormData] = useState({
     email: '',
     role: '',
@@ -1371,110 +1374,86 @@ const SuperAdminTab: React.FC = () => {
     }
   };
 
-  const handleEditUser = async (userId: string, currentEmail: string, currentRoles: string[]) => {
-    const newEmail = prompt('Enter new email address:', currentEmail);
-    if (!newEmail || newEmail === currentEmail) {
-      return; // User cancelled or didn't change email
-    }
+  const handleEditUser = (userId: string, currentEmail: string, currentRoles: string[]) => {
+    setEditingUser({ id: userId, email: currentEmail, currentRoles });
+    setSelectedRoles([...currentRoles]);
+  };
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(newEmail)) {
-      alert('Please enter a valid email address.');
-      return;
-    }
+  const handleCloseRoleEditor = () => {
+    setEditingUser(null);
+    setSelectedRoles([]);
+  };
 
+  const handleToggleRole = (roleName: string) => {
+    setSelectedRoles(prev => {
+      if (prev.includes(roleName)) {
+        return prev.filter(r => r !== roleName);
+      } else {
+        return [...prev, roleName];
+      }
+    });
+  };
+
+  const handleSaveRoles = async () => {
+    if (!editingUser) return;
+
+    setSavingRoles(true);
     try {
-      // Update email in users table
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({ 
-          email: newEmail,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', userId);
+      // Delete existing roles
+      const { error: deleteError } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', editingUser.id);
 
-      if (updateError) {
-        // If user doesn't exist in users table, create it
-        if (updateError.code === 'PGRST116' || updateError.message?.includes('not found')) {
-          const { error: insertError } = await supabase
-            .from('users')
-            .insert({
-              id: userId,
-              email: newEmail,
-            });
-
-          if (insertError) {
-            throw insertError;
-          }
-        } else {
-          throw updateError;
-        }
+      if (deleteError) {
+        throw deleteError;
       }
 
-      // Show role editing option
-      const editRoles = confirm('Would you like to edit user roles?');
-      if (editRoles) {
-        // Get all available roles
-        const { data: allRoles } = await supabase
-          .from('roles')
-          .select('*')
-          .order('name');
-
-        if (allRoles && allRoles.length > 0) {
-          const roleNames = allRoles.map(r => r.name).join(', ');
-          const newRolesInput = prompt(
-            `Current roles: ${currentRoles.join(', ')}\n\nAvailable roles: ${roleNames}\n\nEnter new roles (comma-separated):`,
-            currentRoles.join(', ')
-          );
-
-          if (newRolesInput) {
-            const newRoleNames = newRolesInput.split(',').map(r => r.trim()).filter(Boolean);
-            
-            // Delete existing roles
-            const { error: deleteError } = await supabase
+      // Add new roles
+      if (selectedRoles.length > 0) {
+        for (const roleName of selectedRoles) {
+          const role = roles.find(r => r.name.toLowerCase() === roleName.toLowerCase());
+          if (role) {
+            const { error: insertError } = await supabase
               .from('user_roles')
-              .delete()
-              .eq('user_id', userId);
+              .insert({
+                user_id: editingUser.id,
+                role_id: role.id,
+              });
 
-            if (deleteError) {
-              throw deleteError;
-            }
-
-            // Add new roles
-            for (const roleName of newRoleNames) {
-              const role = allRoles.find(r => r.name.toLowerCase() === roleName.toLowerCase());
-              if (role) {
-                const { error: insertError } = await supabase
-                  .from('user_roles')
-                  .insert({
-                    user_id: userId,
-                    role_id: role.id,
-                  });
-
-                if (insertError) {
-                  console.error(`Error adding role ${roleName}:`, insertError);
-                }
-              } else {
-                alert(`Role "${roleName}" not found. Skipping.`);
-              }
+            if (insertError) {
+              console.error(`Error adding role ${roleName}:`, insertError);
+              alert(`Error adding role "${roleName}". Please try again.`);
             }
           }
         }
       }
 
-      alert('User updated successfully!');
+      alert('User roles updated successfully!');
       await loadData();
+      handleCloseRoleEditor();
     } catch (error: any) {
-      console.error('Error updating user:', error);
-      alert(`Error updating user: ${error.message}`);
+      console.error('Error updating user roles:', error);
+      alert(`Error updating user roles: ${error.message}`);
+    } finally {
+      setSavingRoles(false);
     }
   };
 
   const loadData = async () => {
     setLoading(true);
     try {
-      // Load users with their emails and roles
+      // Load all users from users table
+      const { data: usersData, error: usersError } = await supabase
+        .from('users')
+        .select('id, email')
+        .order('created_at', { ascending: false });
+
+      if (usersError) {
+        console.error('Error loading users:', usersError);
+      }
+
+      // Load all user roles
       const { data: userRoles, error: userRolesError } = await supabase
         .from('user_roles')
         .select(`
@@ -1483,10 +1462,6 @@ const SuperAdminTab: React.FC = () => {
             id,
             name,
             description
-          ),
-          users:user_id (
-            id,
-            email
           )
         `);
 
@@ -1494,22 +1469,25 @@ const SuperAdminTab: React.FC = () => {
         console.error('Error loading user roles:', userRolesError);
       }
 
-      // Get unique user IDs
-      const userIds = [...new Set(userRoles?.map((ur: any) => ur.user_id) || [])];
-      
-      // Build users list with emails and roles
-      const usersWithRoles = userIds.map((userId) => {
-        const userRoleData = userRoles?.filter((ur: any) => ur.user_id === userId) || [];
-        // Get email from users table (first role entry should have it)
-        const userData = userRoleData[0]?.users as any;
-        const email = (userData && !Array.isArray(userData) ? userData.email : null) || '';
-        
-        return {
-          id: userId,
-          email: email || `User ${userId.substring(0, 8)}...`, // Fallback to partial ID if email not available
-          roles: userRoleData.map((ur: any) => ur.roles?.name).filter(Boolean),
-        };
+      // Build a map of user_id -> roles
+      const rolesByUserId = new Map<string, string[]>();
+      (userRoles || []).forEach((ur: any) => {
+        const userId = ur.user_id;
+        const roleName = ur.roles?.name;
+        if (userId && roleName) {
+          if (!rolesByUserId.has(userId)) {
+            rolesByUserId.set(userId, []);
+          }
+          rolesByUserId.get(userId)!.push(roleName);
+        }
       });
+
+      // Combine users with their roles
+      const usersWithRoles = (usersData || []).map((user: any) => ({
+        id: user.id,
+        email: user.email || `User ${user.id.substring(0, 8)}...`,
+        roles: rolesByUserId.get(user.id) || [],
+      }));
 
       // Load roles
       const { data: rolesData, error: rolesError } = await supabase
@@ -1525,6 +1503,7 @@ const SuperAdminTab: React.FC = () => {
       setRoles(rolesData || []);
     } catch (error) {
       console.error('Error loading data:', error);
+      alert('Error loading users. Please refresh the page.');
     } finally {
       setLoading(false);
     }
@@ -1783,24 +1762,183 @@ My Refuge Admin Team`);
                     </p>
                     <p>Roles: {userItem.roles?.join(', ') || 'No roles assigned'}</p>
                   </div>
-                  <div className="admin-dashboard__user-actions">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleEditUser(userItem.id, userItem.email, userItem.roles || [])}
-                    >
-                      Edit
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleDeleteUser(userItem.id, userItem.email)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
+                  {isSuperAdminRole && (
+                    <div className="admin-dashboard__user-actions">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditUser(userItem.id, userItem.email, userItem.roles || [])}
+                      >
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleDeleteUser(userItem.id, userItem.email)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Role Editor Modal */}
+          {editingUser && (
+            <div 
+              className="admin-dashboard__modal-overlay" 
+              onClick={handleCloseRoleEditor}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'rgba(0, 0, 0, 0.6)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10000,
+                padding: '2rem',
+                backdropFilter: 'blur(4px)',
+              }}
+            >
+              <div 
+                className="admin-dashboard__modal" 
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  background: '#FFFFFF',
+                  borderRadius: '1rem',
+                  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+                  maxWidth: '500px',
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '1.5rem 2rem',
+                  borderBottom: '1px solid #E8E8E8',
+                }}>
+                  <h3 style={{
+                    fontSize: '1.25rem',
+                    fontWeight: 700,
+                    color: '#1a1a1a',
+                    margin: 0,
+                  }}>
+                    Edit Roles: {editingUser.email}
+                  </h3>
+                  <button 
+                    onClick={handleCloseRoleEditor}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      fontSize: '2rem',
+                      color: '#757575',
+                      cursor: 'pointer',
+                      lineHeight: 1,
+                      padding: 0,
+                      width: '2rem',
+                      height: '2rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '0.5rem',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#F5F5F5';
+                      e.currentTarget.style.color = '#1a1a1a';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = '#757575';
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+                <div style={{
+                  padding: '2rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                }}>
+                  {roles.length === 0 ? (
+                    <p style={{ color: '#757575' }}>No roles available. Please create roles first.</p>
+                  ) : (
+                    roles.map((role) => (
+                      <label
+                        key={role.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          cursor: 'pointer',
+                          padding: '0.75rem',
+                          borderRadius: '0.5rem',
+                          transition: 'background 0.2s',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#F8F9FA';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'transparent';
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedRoles.includes(role.name)}
+                          onChange={() => handleToggleRole(role.name)}
+                          style={{
+                            width: '1.25rem',
+                            height: '1.25rem',
+                            cursor: 'pointer',
+                            accentColor: '#007DFF',
+                          }}
+                        />
+                        <div>
+                          <div style={{ fontWeight: 600, color: '#1a1a1a' }}>{role.name}</div>
+                          {role.description && (
+                            <div style={{ fontSize: '0.875rem', color: '#757575', marginTop: '0.25rem' }}>
+                              {role.description}
+                            </div>
+                          )}
+                        </div>
+                      </label>
+                    ))
+                  )}
+                </div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '1rem',
+                  padding: '1.5rem 2rem',
+                  borderTop: '1px solid #E8E8E8',
+                }}>
+                  <Button 
+                    variant="outline" 
+                    size="md" 
+                    onClick={handleCloseRoleEditor}
+                    disabled={savingRoles}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    variant="primary" 
+                    size="md" 
+                    onClick={handleSaveRoles}
+                    disabled={savingRoles}
+                  >
+                    {savingRoles ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
         </Card>
