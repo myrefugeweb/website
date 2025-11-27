@@ -34,8 +34,8 @@ export const StatsSection: React.FC = () => {
             transition={{ duration: 0.8, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="stats-section__icon">{stat.icon}</div>
-            <div className="stats-section__value">{stat.value}</div>
-            <div className="stats-section__label">{stat.label}</div>
+            <div className="stats-section__value" data-editable-type="text" data-editable-section="stats">{stat.value}</div>
+            <div className="stats-section__label" data-editable-type="text" data-editable-section="stats">{stat.label}</div>
             {index < stats.length - 1 && (
               <div className="stats-section__divider"></div>
             )}

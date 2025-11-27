@@ -3,20 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { supabase } from '../../lib/supabase';
-import type { ImageUpload, CalendarEvent, Sponsor } from '../../lib/supabase';
+import type { CalendarEvent } from '../../lib/supabase';
 import { useUserRole } from '../../hooks/useUserRole';
-import { LayoutPreview } from '../../components/LayoutPreview';
+import { VisualEditor } from '../../components/VisualEditor';
 import './AdminDashboard.css';
 
-type MainTab = 'edit-site' | 'events' | 'analytics' | 'admin';
-type SiteTab = 'my-refuge' | 'sparrows-closet';
-type SectionType = 'hero' | 'mission' | 'story' | 'help' | 'contact' | 'impact' | 'donation' | 'sponsors' | 'sparrows-closet-hero' | 'sparrows-closet-info' | 'sparrows-closet-impact' | 'sparrows-closet-cta';
+type MainTab = 'visual-editor' | 'events' | 'analytics' | 'admin';
 
 export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [activeMainTab, setActiveMainTab] = useState<MainTab>('edit-site');
-  const [activeSiteTab, setActiveSiteTab] = useState<SiteTab>('my-refuge');
-  const [selectedSection, setSelectedSection] = useState<SectionType>('hero');
+  const [activeMainTab, setActiveMainTab] = useState<MainTab>('visual-editor');
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { userRole, isSuperAdmin: isSuperAdminRole, loading: roleLoading } = useUserRole();
@@ -79,10 +75,10 @@ export const AdminDashboard: React.FC = () => {
 
       <div className="admin-dashboard__main-tabs">
         <button
-          className={`admin-dashboard__main-tab ${activeMainTab === 'edit-site' ? 'active' : ''}`}
-          onClick={() => setActiveMainTab('edit-site')}
+          className={`admin-dashboard__main-tab ${activeMainTab === 'visual-editor' ? 'active' : ''}`}
+          onClick={() => setActiveMainTab('visual-editor')}
         >
-          ✏️ Edit Site
+          🎨 Visual Editor
         </button>
         <button
           className={`admin-dashboard__main-tab ${activeMainTab === 'events' ? 'active' : ''}`}
@@ -107,13 +103,12 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       <div className="admin-dashboard__content-area">
-        {activeMainTab === 'edit-site' && (
-          <EditSiteTab
-            activeSiteTab={activeSiteTab}
-            setActiveSiteTab={setActiveSiteTab}
-            selectedSection={selectedSection}
-            setSelectedSection={setSelectedSection}
-          />
+        {activeMainTab === 'visual-editor' && (userRole === 'admin' || userRole === 'editor' || isSuperAdminRole) && <VisualEditor />}
+        {activeMainTab === 'visual-editor' && userRole === 'viewer' && (
+          <div className="admin-dashboard__empty-state">
+            <p>⚠️ Viewers do not have access to the Visual Editor.</p>
+            <p className="admin-dashboard__empty-hint">Please contact an admin if you need editing access.</p>
+          </div>
         )}
         {activeMainTab === 'events' && <EventsTab />}
         {activeMainTab === 'analytics' && <AnalyticsTab />}
@@ -124,6 +119,8 @@ export const AdminDashboard: React.FC = () => {
 };
 
 // Edit Site Tab Component
+// EditSiteTab is no longer used - replaced by VisualEditor
+/*
 const EditSiteTab: React.FC<{
   activeSiteTab: SiteTab;
   setActiveSiteTab: (tab: SiteTab) => void;
@@ -195,11 +192,12 @@ const EditSiteTab: React.FC<{
       </div>
     </>
   );
-};
+}; */
 
-// Sponsors Manager Component
+// Sponsors Manager Component - no longer used
+/*
 const SponsorsManager: React.FC = () => {
-  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [sponsors, setSponsors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -293,7 +291,7 @@ const SponsorsManager: React.FC = () => {
     }
   };
 
-  const handleToggleActive = async (sponsor: Sponsor) => {
+  const handleToggleActive = async (sponsor: any) => {
     const { error } = await supabase
       .from('sponsors')
       .update({ is_active: !sponsor.is_active })
@@ -413,12 +411,15 @@ const SponsorsManager: React.FC = () => {
   );
 };
 
-// Section Editor Component
+// Section Editor Component - no longer used, replaced by VisualEditor
+/*
 const SectionEditor: React.FC<{ section: SectionType; siteTab: SiteTab }> = ({ section, siteTab: _siteTab }) => {
   const [images, setImages] = useState<ImageUpload[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [layout, setLayout] = useState<string>('default');
+  const [editingImage, setEditingImage] = useState<string | null>(null);
+  const [editAltText, setEditAltText] = useState<string>('');
 
   useEffect(() => {
     loadImages();
@@ -558,6 +559,79 @@ const SectionEditor: React.FC<{ section: SectionType; siteTab: SiteTab }> = ({ s
     }
   };
 
+  const handleToggleActive = async (image: ImageUpload) => {
+    try {
+      const { error } = await supabase
+        .from('images')
+        .update({ is_active: !image.is_active })
+        .eq('id', image.id);
+
+      if (error) throw error;
+      await loadImages();
+    } catch (error: any) {
+      console.error('Error toggling image active status:', error);
+      alert(`Error updating image: ${error.message}`);
+    }
+  };
+
+  const handleUpdateAltText = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('images')
+        .update({ alt_text: editAltText })
+        .eq('id', id);
+
+      if (error) throw error;
+      setEditingImage(null);
+      await loadImages();
+    } catch (error: any) {
+      console.error('Error updating alt text:', error);
+      alert(`Error updating alt text: ${error.message}`);
+    }
+  };
+
+  const handleMoveImage = async (id: string, direction: 'up' | 'down') => {
+    const currentIndex = images.findIndex(img => img.id === id);
+    if (currentIndex === -1) return;
+
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= images.length) return;
+
+    const currentImage = images[currentIndex];
+    const targetImage = images[newIndex];
+
+    try {
+      // Swap order indices
+      const { error: error1 } = await supabase
+        .from('images')
+        .update({ order_index: targetImage.order_index })
+        .eq('id', currentImage.id);
+
+      if (error1) throw error1;
+
+      const { error: error2 } = await supabase
+        .from('images')
+        .update({ order_index: currentImage.order_index })
+        .eq('id', targetImage.id);
+
+      if (error2) throw error2;
+
+      await loadImages();
+    } catch (error: any) {
+      console.error('Error moving image:', error);
+      alert(`Error moving image: ${error.message}`);
+    }
+  };
+
+  const getPrimaryImage = () => {
+    return images.find(img => img.is_active) || images[0];
+  };
+
+  const startEditingAltText = (image: ImageUpload) => {
+    setEditingImage(image.id);
+    setEditAltText(image.alt_text || '');
+  };
+
   const sectionLabels: Record<SectionType, string> = {
     'hero': 'Hero Section',
     'mission': 'Mission Section',
@@ -641,28 +715,148 @@ const SectionEditor: React.FC<{ section: SectionType; siteTab: SiteTab }> = ({ s
           <p className="admin-dashboard__empty-hint">Upload an image above to get started.</p>
         </div>
       ) : (
-        <div className="admin-dashboard__image-grid">
-          {images.map((image) => (
-            <div key={image.id} className="admin-dashboard__image-item">
-              <div className="admin-dashboard__image-preview">
-                <img src={image.url} alt={image.alt_text || ''} />
-              </div>
-              <div className="admin-dashboard__image-actions">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDelete(image.id)}
-                >
-                  Delete
-                </Button>
+        <>
+          <div className="admin-dashboard__image-info-banner">
+            <div className="admin-dashboard__image-info-content">
+              <span className="admin-dashboard__image-info-icon">ℹ️</span>
+              <div>
+                <strong>How images work:</strong>
+                <p>The first active image (shown with a star ⭐) is displayed on your main website. You can reorder images or toggle them active/inactive to control which one appears.</p>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+          <div className="admin-dashboard__image-list">
+            {images.map((image, index) => {
+              const isPrimary = getPrimaryImage()?.id === image.id && image.is_active;
+              
+              return (
+                <div 
+                  key={image.id} 
+                  className={`admin-dashboard__image-card ${isPrimary ? 'admin-dashboard__image-card--primary' : ''} ${!image.is_active ? 'admin-dashboard__image-card--inactive' : ''}`}
+                >
+                  <div className="admin-dashboard__image-card-header">
+                    <div className="admin-dashboard__image-card-badge">
+                      {isPrimary && image.is_active && (
+                        <span className="admin-dashboard__primary-badge">⭐ Primary (Shown on Site)</span>
+                      )}
+                      {!image.is_active && (
+                        <span className="admin-dashboard__inactive-badge">Inactive</span>
+                      )}
+                      {image.is_active && !isPrimary && (
+                        <span className="admin-dashboard__secondary-badge">Active (Not Displayed)</span>
+                      )}
+                    </div>
+                    <div className="admin-dashboard__image-card-position">
+                      Position: {index + 1} of {images.length}
+                    </div>
+                  </div>
+                  
+                  <div className="admin-dashboard__image-card-preview">
+                    <img src={image.url} alt={image.alt_text || ''} />
+                    {isPrimary && image.is_active && (
+                      <div className="admin-dashboard__image-card-overlay">
+                        <span>Currently Displayed</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="admin-dashboard__image-card-details">
+                    {editingImage === image.id ? (
+                      <div className="admin-dashboard__image-edit-form">
+                        <input
+                          type="text"
+                          value={editAltText}
+                          onChange={(e) => setEditAltText(e.target.value)}
+                          placeholder="Alt text for accessibility"
+                          className="admin-dashboard__image-edit-input"
+                        />
+                        <div className="admin-dashboard__image-edit-actions">
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => handleUpdateAltText(image.id)}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setEditingImage(null);
+                              setEditAltText('');
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="admin-dashboard__image-card-alt">
+                        <strong>Alt Text:</strong> {image.alt_text || 'No alt text set'}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="admin-dashboard__image-card-actions">
+                    <div className="admin-dashboard__image-card-actions-row">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleToggleActive(image)}
+                        title={image.is_active ? 'Hide from site' : 'Show on site'}
+                      >
+                        {image.is_active ? '👁️ Hide' : '👁️‍🗨️ Show'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => startEditingAltText(image)}
+                        title="Edit alt text for accessibility"
+                      >
+                        ✏️ Edit Alt Text
+                      </Button>
+                    </div>
+                    <div className="admin-dashboard__image-card-actions-row">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleMoveImage(image.id, 'up')}
+                        disabled={index === 0}
+                        title="Move up (makes it primary if active)"
+                      >
+                        ⬆️ Move Up
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleMoveImage(image.id, 'down')}
+                        disabled={index === images.length - 1}
+                        title="Move down"
+                      >
+                        ⬇️ Move Down
+                      </Button>
+                    </div>
+                    <div className="admin-dashboard__image-card-actions-row">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(image.id)}
+                        className="admin-dashboard__delete-btn"
+                      >
+                        🗑️ Delete
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
     </Card>
   );
 };
+*/
 
 // Events Tab Component
 const EventsTab: React.FC = () => {
@@ -686,6 +880,7 @@ const EventsTab: React.FC = () => {
     const { data, error } = await supabase
       .from('calendar_events')
       .select('*')
+      .eq('is_active', true)
       .order('date', { ascending: true });
 
     if (error) {
@@ -719,7 +914,7 @@ const EventsTab: React.FC = () => {
     if (!confirm('Are you sure you want to delete this event?')) return;
     const { error } = await supabase
       .from('calendar_events')
-      .update({ is_active: false })
+      .delete()
       .eq('id', id);
 
     if (error) {
@@ -1092,15 +1287,18 @@ const AnalyticsTab: React.FC = () => {
 
 // Super Admin Tab Component
 const SuperAdminTab: React.FC = () => {
+  const { userRole, isSuperAdmin: isSuperAdminRole } = useUserRole();
+  const isAdmin = isSuperAdminRole || userRole === 'admin';
+  
   const [users, setUsers] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSubTab, setActiveSubTab] = useState<'users' | 'roles'>('users');
   const [showUserForm, setShowUserForm] = useState(false);
   const [showRoleForm, setShowRoleForm] = useState(false);
+  const [generatedPassword, setGeneratedPassword] = useState<string>('');
   const [userFormData, setUserFormData] = useState({
     email: '',
-    password: '',
     role: '',
   });
   const [roleFormData, setRoleFormData] = useState({
@@ -1112,6 +1310,25 @@ const SuperAdminTab: React.FC = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Generate a secure random password
+  const generatePassword = (): string => {
+    const length = 12;
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+    let password = '';
+    for (let i = 0; i < length; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    return password;
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Password copied to clipboard!');
+    }).catch(() => {
+      alert('Failed to copy. Password: ' + text);
+    });
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -1138,10 +1355,15 @@ const SuperAdminTab: React.FC = () => {
       
       // For each user, get their roles
       // Note: We can't directly query auth.users without Admin API, so we'll show users from user_roles
+      // We'll try to get email from the current session if it matches, otherwise show user ID
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
       const usersWithRoles = userIds.map((userId) => {
         const userRoleData = userRoles?.filter((ur: any) => ur.user_id === userId) || [];
+        // If this is the current user, we can show their email
+        const email = userId === currentUser?.id ? currentUser?.email || '' : '';
         return {
           id: userId,
+          email: email || `User ${userId.substring(0, 8)}...`, // Show partial ID if email not available
           roles: userRoleData.map((ur: any) => ur.roles?.name).filter(Boolean),
         };
       });
@@ -1174,12 +1396,14 @@ const SuperAdminTab: React.FC = () => {
         >
           👥 Users
         </button>
-        <button
-          className={`admin-dashboard__admin-subtab ${activeSubTab === 'roles' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('roles')}
-        >
-          🔐 Roles & Permissions
-        </button>
+        {isSuperAdminRole && (
+          <button
+            className={`admin-dashboard__admin-subtab ${activeSubTab === 'roles' ? 'active' : ''}`}
+            onClick={() => setActiveSubTab('roles')}
+          >
+            🔐 Roles & Permissions
+          </button>
+        )}
       </div>
 
       {activeSubTab === 'users' && (
@@ -1189,13 +1413,130 @@ const SuperAdminTab: React.FC = () => {
               <h2 className="admin-dashboard__editor-title">User Management</h2>
               <p className="admin-dashboard__editor-subtitle">Add, edit, and manage user accounts</p>
             </div>
-            <Button variant="primary" size="md" onClick={() => setShowUserForm(!showUserForm)}>
-              {showUserForm ? 'Cancel' : '➕ Add User'}
-            </Button>
+            {isAdmin && (
+              <Button variant="primary" size="md" onClick={() => {
+                setShowUserForm(!showUserForm);
+                if (!showUserForm) {
+                  const newPassword = generatePassword();
+                  setGeneratedPassword(newPassword);
+                } else {
+                  setGeneratedPassword('');
+                }
+              }}>
+                {showUserForm ? 'Cancel' : '➕ Add User'}
+              </Button>
+            )}
           </div>
 
-          {showUserForm && (
-            <form className="admin-dashboard__form" style={{ marginTop: '2rem' }}>
+          {!isAdmin && (
+            <div className="admin-dashboard__empty-state" style={{ marginTop: '2rem' }}>
+              <p>⚠️ Only admins and super admins can add members.</p>
+            </div>
+          )}
+
+          {showUserForm && isAdmin && (
+            <form 
+              className="admin-dashboard__form" 
+              style={{ marginTop: '2rem' }}
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!userFormData.email || !userFormData.role) {
+                  alert('Please fill in all required fields.');
+                  return;
+                }
+
+                try {
+                  // Create user with generated password
+                  const password = generatedPassword || generatePassword();
+                  const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: userFormData.email,
+                    password: password,
+                    options: {
+                      emailRedirectTo: undefined, // Disable email confirmation redirect
+                      data: {
+                        must_change_password: true, // Flag to force password change on first login
+                        temporary_password: password, // Store password temporarily (will be cleared after first login)
+                      }
+                    }
+                  });
+
+                  if (authError) {
+                    alert(`Error creating user: ${authError.message}`);
+                    return;
+                  }
+
+                  if (authData.user) {
+                    // Get role ID
+                    const { data: roleData } = await supabase
+                      .from('roles')
+                      .select('id')
+                      .eq('name', userFormData.role)
+                      .single();
+
+                    if (roleData) {
+                      // Assign role to user
+                      const { error: roleError } = await supabase
+                        .from('user_roles')
+                        .insert({
+                          user_id: authData.user.id,
+                          role_id: roleData.id,
+                        });
+
+                      if (roleError) {
+                        console.error('Error assigning role:', roleError);
+                        alert('User created but failed to assign role. Please assign manually.');
+                      } else {
+                        // Copy password to clipboard
+                        copyToClipboard(password);
+                        
+                        // Show success message with email instructions
+                        const emailSubject = encodeURIComponent('Your My Refuge Admin Account');
+                        const emailBody = encodeURIComponent(`Hello,
+
+Your admin account has been created for My Refuge.
+
+Login Details:
+Email: ${userFormData.email}
+Temporary Password: ${password}
+
+IMPORTANT: You will be required to change this password on your first login for security reasons.
+
+Login URL: ${window.location.origin}/admin
+
+Please keep this password secure and do not share it with anyone.
+
+Best regards,
+My Refuge Admin Team`);
+                        
+                        const mailtoLink = `mailto:${userFormData.email}?subject=${emailSubject}&body=${emailBody}`;
+                        
+                        // Show alert with instructions
+                        const shouldOpenEmail = confirm(
+                          `User created successfully!\n\n` +
+                          `Password: ${password}\n\n` +
+                          `Password has been copied to clipboard.\n\n` +
+                          `Would you like to open your email client to send this password to ${userFormData.email}?`
+                        );
+                        
+                        if (shouldOpenEmail) {
+                          window.location.href = mailtoLink;
+                        }
+                        
+                        setShowUserForm(false);
+                        setUserFormData({ email: '', role: '' });
+                        setGeneratedPassword('');
+                        await loadData();
+                      }
+                    } else {
+                      alert('User created but role not found. Please assign role manually.');
+                    }
+                  }
+                } catch (error: any) {
+                  console.error('Error creating user:', error);
+                  alert(`Error creating user: ${error.message}`);
+                }
+              }}
+            >
               <div className="admin-dashboard__field">
                 <label>Email *</label>
                 <input
@@ -1207,14 +1548,37 @@ const SuperAdminTab: React.FC = () => {
                 />
               </div>
               <div className="admin-dashboard__field">
-                <label>Password *</label>
-                <input
-                  type="password"
-                  value={userFormData.password}
-                  onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
-                  required
-                  placeholder="Minimum 6 characters"
-                />
+                <label>Generated Password *</label>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    value={generatedPassword}
+                    readOnly
+                    style={{ flex: 1, fontFamily: 'monospace', backgroundColor: '#F5F5F5' }}
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      const newPassword = generatePassword();
+                      setGeneratedPassword(newPassword);
+                    }}
+                  >
+                    🔄 Regenerate
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => copyToClipboard(generatedPassword)}
+                  >
+                    📋 Copy
+                  </Button>
+                </div>
+                <p style={{ fontSize: '0.875rem', color: '#757575', marginTop: '0.5rem' }}>
+                  Copy this password and email it to the user. They will be required to change it on first login.
+                </p>
               </div>
               <div className="admin-dashboard__field">
                 <label>Role *</label>
@@ -1248,7 +1612,10 @@ const SuperAdminTab: React.FC = () => {
               {users.map((userItem) => (
                 <div key={userItem.id} className="admin-dashboard__user-item">
                   <div>
-                    <h3>User ID: {userItem.id}</h3>
+                    <h3>{userItem.email || 'Email not available'}</h3>
+                    <p style={{ fontSize: '0.875rem', color: '#757575', marginTop: '0.25rem' }}>
+                      User ID: {userItem.id}
+                    </p>
                     <p>Roles: {userItem.roles?.join(', ') || 'No roles assigned'}</p>
                   </div>
                   <div className="admin-dashboard__user-actions">

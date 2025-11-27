@@ -92,11 +92,19 @@ export const AdminLogin: React.FC = () => {
         setLoading(false);
       } else if (data.user) {
         console.log('✅ Login successful!', { userId: data.user.id, email: data.user.email });
-        // Store session info (Supabase handles this automatically, but we can store additional info)
-        if (data.session) {
-          localStorage.setItem('supabase.auth.token', JSON.stringify(data.session));
+        // Check if user needs to change password
+        const mustChangePassword = data.user.user_metadata?.must_change_password;
+        if (mustChangePassword) {
+          // Store that we need to change password
+          localStorage.setItem('must_change_password', 'true');
+          navigate('/admin/change-password');
+        } else {
+          // Store session info (Supabase handles this automatically, but we can store additional info)
+          if (data.session) {
+            localStorage.setItem('supabase.auth.token', JSON.stringify(data.session));
+          }
+          navigate('/admin/dashboard');
         }
-        navigate('/admin/dashboard');
       } else {
         setError('Login failed. No user data returned.');
         setLoading(false);

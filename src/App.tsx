@@ -3,6 +3,7 @@ import { HomePage } from './pages/HomePage';
 import { SparrowsClosetPage } from './pages/SparrowsClosetPage';
 import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { ChangePassword } from './pages/ChangePassword';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAnalytics } from './hooks/useAnalytics';
 import './styles/global.css';
@@ -25,6 +26,14 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/sparrows-closet" element={<SparrowsClosetPage />} />
             <Route path="/admin" element={<AdminLogin />} />
+            <Route 
+              path="/admin/change-password" 
+              element={
+                <ProtectedRoute>
+                  <ChangePassword />
+                </ProtectedRoute>
+              } 
+            />
             <Route 
               path="/admin/dashboard" 
               element={

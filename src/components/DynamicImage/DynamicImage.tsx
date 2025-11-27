@@ -44,9 +44,18 @@ export const DynamicImage: React.FC<DynamicImageProps> = ({
           .single();
 
         // PGRST116 is "no rows returned" - this is expected if no image exists
-        if (error && error.code !== 'PGRST116') {
-          // Only log if it's not a missing key error
-          if (!error.message.includes('JWT') && !error.message.includes('key')) {
+        // 406 errors are RLS policy issues - handled gracefully by showing placeholder
+        // Suppress these errors in console to avoid spam
+        if (error) {
+          const isExpectedError = 
+            error.code === 'PGRST116' || // No rows returned
+            error.code === 'PGRST301' || // Not found
+            error.message?.includes('406') || // RLS policy issue
+            error.message?.includes('JWT') || // Auth issue
+            error.message?.includes('key'); // Config issue
+          
+          // Only log unexpected errors
+          if (!isExpectedError) {
             console.error('Error loading image:', error);
           }
         }
@@ -56,8 +65,15 @@ export const DynamicImage: React.FC<DynamicImageProps> = ({
         }
       } catch (error: any) {
         // Silently handle errors - just show placeholder
-        // Don't log if it's a Supabase auth error
-        if (error?.message && !error.message.includes('JWT') && !error.message.includes('key')) {
+        // Suppress expected errors (RLS, auth, config issues)
+        const isExpectedError = 
+          error?.message?.includes('406') || // RLS policy issue
+          error?.message?.includes('JWT') || // Auth issue
+          error?.message?.includes('key') || // Config issue
+          error?.code === 'PGRST116' || // No rows
+          error?.code === 'PGRST301'; // Not found
+        
+        if (!isExpectedError && error?.message) {
           console.error('Error loading image:', error);
         }
       } finally {
@@ -78,11 +94,22 @@ export const DynamicImage: React.FC<DynamicImageProps> = ({
 
   if (!imageUrl && !fallback) {
     return (
-      <div className={`dynamic-image dynamic-image--placeholder ${className}`}>
+      <div 
+        className={`dynamic-image dynamic-image--placeholder ${className}`}
+        data-section={section}
+        data-editable-type="image"
+        data-editable={`img-${section}-0`}
+        data-editable-section={section}
+      >
         <div className="dynamic-image__placeholder">No image available</div>
       </div>
     );
   }
+
+  const handleImageError = () => {
+    // If image fails to load, set to null to show placeholder
+    setImageUrl(null);
+  };
 
   return (
     <img
@@ -90,6 +117,9 @@ export const DynamicImage: React.FC<DynamicImageProps> = ({
       alt={alt || `Image for ${section}`}
       className={`dynamic-image ${className}`}
       loading="lazy"
+      data-section={section}
+      data-editable-type="image"
+      onError={handleImageError}
     />
   );
 };
