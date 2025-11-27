@@ -1330,11 +1330,151 @@ const SuperAdminTab: React.FC = () => {
     });
   };
 
+  const handleDeleteUser = async (userId: string, userEmail: string) => {
+    if (!confirm(`Are you sure you want to delete user ${userEmail || userId}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      // Delete user roles first (cascade will handle this, but being explicit)
+      const { error: rolesError } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId);
+
+      if (rolesError) {
+        console.error('Error deleting user roles:', rolesError);
+        alert('Error deleting user roles. Please try again.');
+        return;
+      }
+
+      // Delete from users table
+      const { error: userError } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', userId);
+
+      if (userError) {
+        console.error('Error deleting user:', userError);
+        // Continue anyway - the user might not exist in users table yet
+      }
+
+      // Note: We cannot delete from auth.users using the client SDK
+      // The user will need to be deleted manually from Supabase Dashboard → Authentication → Users
+      // Or we could create an Edge Function for this
+      alert('User roles and data deleted. Note: The user account in auth.users must be deleted manually from Supabase Dashboard → Authentication → Users.');
+      
+      await loadData();
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      alert(`Error deleting user: ${error.message}`);
+    }
+  };
+
+  const handleEditUser = async (userId: string, currentEmail: string, currentRoles: string[]) => {
+    const newEmail = prompt('Enter new email address:', currentEmail);
+    if (!newEmail || newEmail === currentEmail) {
+      return; // User cancelled or didn't change email
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    try {
+      // Update email in users table
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ 
+          email: newEmail,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId);
+
+      if (updateError) {
+        // If user doesn't exist in users table, create it
+        if (updateError.code === 'PGRST116' || updateError.message?.includes('not found')) {
+          const { error: insertError } = await supabase
+            .from('users')
+            .insert({
+              id: userId,
+              email: newEmail,
+            });
+
+          if (insertError) {
+            throw insertError;
+          }
+        } else {
+          throw updateError;
+        }
+      }
+
+      // Show role editing option
+      const editRoles = confirm('Would you like to edit user roles?');
+      if (editRoles) {
+        // Get all available roles
+        const { data: allRoles } = await supabase
+          .from('roles')
+          .select('*')
+          .order('name');
+
+        if (allRoles && allRoles.length > 0) {
+          const roleNames = allRoles.map(r => r.name).join(', ');
+          const newRolesInput = prompt(
+            `Current roles: ${currentRoles.join(', ')}\n\nAvailable roles: ${roleNames}\n\nEnter new roles (comma-separated):`,
+            currentRoles.join(', ')
+          );
+
+          if (newRolesInput) {
+            const newRoleNames = newRolesInput.split(',').map(r => r.trim()).filter(Boolean);
+            
+            // Delete existing roles
+            const { error: deleteError } = await supabase
+              .from('user_roles')
+              .delete()
+              .eq('user_id', userId);
+
+            if (deleteError) {
+              throw deleteError;
+            }
+
+            // Add new roles
+            for (const roleName of newRoleNames) {
+              const role = allRoles.find(r => r.name.toLowerCase() === roleName.toLowerCase());
+              if (role) {
+                const { error: insertError } = await supabase
+                  .from('user_roles')
+                  .insert({
+                    user_id: userId,
+                    role_id: role.id,
+                  });
+
+                if (insertError) {
+                  console.error(`Error adding role ${roleName}:`, insertError);
+                }
+              } else {
+                alert(`Role "${roleName}" not found. Skipping.`);
+              }
+            }
+          }
+        }
+      }
+
+      alert('User updated successfully!');
+      await loadData();
+    } catch (error: any) {
+      console.error('Error updating user:', error);
+      alert(`Error updating user: ${error.message}`);
+    }
+  };
+
   const loadData = async () => {
     setLoading(true);
     try {
-      // Load users from auth.users (via Supabase Admin API would be better, but we'll use what we have)
-      // Note: We can't directly query auth.users, so we'll get users from user_roles
+      // Load users with their emails and roles
       const { data: userRoles, error: userRolesError } = await supabase
         .from('user_roles')
         .select(`
@@ -1343,6 +1483,10 @@ const SuperAdminTab: React.FC = () => {
             id,
             name,
             description
+          ),
+          users:user_id (
+            id,
+            email
           )
         `);
 
@@ -1353,17 +1497,16 @@ const SuperAdminTab: React.FC = () => {
       // Get unique user IDs
       const userIds = [...new Set(userRoles?.map((ur: any) => ur.user_id) || [])];
       
-      // For each user, get their roles
-      // Note: We can't directly query auth.users without Admin API, so we'll show users from user_roles
-      // We'll try to get email from the current session if it matches, otherwise show user ID
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      // Build users list with emails and roles
       const usersWithRoles = userIds.map((userId) => {
         const userRoleData = userRoles?.filter((ur: any) => ur.user_id === userId) || [];
-        // If this is the current user, we can show their email
-        const email = userId === currentUser?.id ? currentUser?.email || '' : '';
+        // Get email from users table (first role entry should have it)
+        const userData = userRoleData[0]?.users as any;
+        const email = (userData && !Array.isArray(userData) ? userData.email : null) || '';
+        
         return {
           id: userId,
-          email: email || `User ${userId.substring(0, 8)}...`, // Show partial ID if email not available
+          email: email || `User ${userId.substring(0, 8)}...`, // Fallback to partial ID if email not available
           roles: userRoleData.map((ur: any) => ur.roles?.name).filter(Boolean),
         };
       });
@@ -1460,6 +1603,8 @@ const SuperAdminTab: React.FC = () => {
                       data: {
                         must_change_password: true, // Flag to force password change on first login
                         temporary_password: password, // Store password temporarily (will be cleared after first login)
+                        password: password, // Also store in Data for email template access
+                        role: userFormData.role, // Include role in email
                       }
                     }
                   });
@@ -1470,6 +1615,22 @@ const SuperAdminTab: React.FC = () => {
                   }
 
                   if (authData.user) {
+                    // Store user email in users table
+                    const { error: userEmailError } = await supabase
+                      .from('users')
+                      .upsert({
+                        id: authData.user.id,
+                        email: userFormData.email,
+                        updated_at: new Date().toISOString(),
+                      }, {
+                        onConflict: 'id'
+                      });
+
+                    if (userEmailError) {
+                      console.error('Error storing user email:', userEmailError);
+                      // Continue anyway - email storage is not critical
+                    }
+
                     // Get role ID
                     const { data: roleData } = await supabase
                       .from('roles')
@@ -1623,8 +1784,20 @@ My Refuge Admin Team`);
                     <p>Roles: {userItem.roles?.join(', ') || 'No roles assigned'}</p>
                   </div>
                   <div className="admin-dashboard__user-actions">
-                    <Button variant="outline" size="sm">Edit</Button>
-                    <Button variant="outline" size="sm">Delete</Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleEditUser(userItem.id, userItem.email, userItem.roles || [])}
+                    >
+                      Edit
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleDeleteUser(userItem.id, userItem.email)}
+                    >
+                      Delete
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -1762,8 +1935,49 @@ My Refuge Admin Team`);
                     </div>
                   </div>
                   <div className="admin-dashboard__role-actions">
-                    <Button variant="outline" size="sm">Edit</Button>
-                    <Button variant="outline" size="sm">Delete</Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        alert('Role editing coming soon!');
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={async () => {
+                        if (!confirm(`Are you sure you want to delete role "${role.name}"? This will remove it from all users.`)) {
+                          return;
+                        }
+                        try {
+                          // First, delete all user_roles entries for this role
+                          const { error: userRolesError } = await supabase
+                            .from('user_roles')
+                            .delete()
+                            .eq('role_id', role.id);
+
+                          if (userRolesError) throw userRolesError;
+
+                          // Then delete the role
+                          const { error: roleError } = await supabase
+                            .from('roles')
+                            .delete()
+                            .eq('id', role.id);
+
+                          if (roleError) throw roleError;
+
+                          alert('Role deleted successfully!');
+                          await loadData();
+                        } catch (error: any) {
+                          console.error('Error deleting role:', error);
+                          alert(`Error deleting role: ${error.message}`);
+                        }
+                      }}
+                    >
+                      Delete
+                    </Button>
                   </div>
                 </div>
               ))}

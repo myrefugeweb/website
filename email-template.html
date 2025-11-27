@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm Your Admin Account - My Refuge</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #F5F5F5;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #F5F5F5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="background-color: #FFFFFF; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); overflow: hidden;">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #FF8C00 0%, #FF9500 100%); padding: 40px 30px; text-align: center;">
+              <h1 style="margin: 0; font-size: 32px; font-weight: 700; color: #FFFFFF; letter-spacing: 1px;">My Refuge</h1>
+            </td>
+          </tr>
+          
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h1 style="margin: 0 0 20px 0; font-size: 28px; font-weight: 700; color: #1a1a1a; line-height: 1.3;">Welcome to My Refuge!</h1>
+              
+              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #666666;">We're excited to have you join our team! Your admin account has been created and you're ready to get started.</p>
+              
+              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #666666;">Please use the temporary password below to log in for the first time:</p>
+              
+              <!-- Password Box -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #F5F5F5; border-radius: 8px; padding: 20px; margin: 30px 0;">
+                <tr>
+                  <td style="text-align: center;">
+                    <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px;">Temporary Password</p>
+                    <p style="margin: 0; font-size: 20px; color: #FF8C00; font-weight: 700; font-family: 'Courier New', monospace; letter-spacing: 3px;">{{ .Data.password }}</p>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Important Notice -->
+              <div style="background-color: #FFF4E6; border-left: 4px solid #FF8C00; padding: 16px 20px; margin: 30px 0; border-radius: 4px;">
+                <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #1a1a1a;">
+                  <strong style="color: #FF8C00;">⚠️ Important:</strong> For your security, you will be required to create a new password when you log in for the first time.
+                </p>
+              </div>
+              
+              <!-- Confirmation Button -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 30px 0;">
+                <tr>
+                  <td align="center" style="padding: 20px 0;">
+                    <a href="{{ .ConfirmationURL }}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #FF8C00 0%, #FF9500 100%); color: #FFFFFF; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);">Confirm Your Account</a>
+                  </td>
+                </tr>
+              </table>
+              
+              <p style="margin: 20px 0 0 0; font-size: 16px; line-height: 1.6; color: #666666;">After confirming your account, you can access the admin dashboard at:</p>
+              <p style="margin: 8px 0 20px 0;">
+                <a href="{{ .SiteURL }}/admin" style="color: #007DFF; text-decoration: none; font-weight: 500; font-size: 16px;">{{ .SiteURL }}/admin</a>
+              </p>
+              
+              <p style="margin: 20px 0 0 0; font-size: 16px; line-height: 1.6; color: #666666;">We're here to support you every step of the way. If you have any questions or need assistance, please don't hesitate to reach out.</p>
+              
+              <hr style="border: none; border-top: 1px solid #E0E0E0; margin: 30px 0;" />
+              
+              <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #666666;">
+                If you have any questions or need assistance, please contact your administrator.
+              </p>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #F5F5F5; padding: 30px; text-align: center; border-top: 1px solid #E0E0E0;">
+              <p style="margin: 0 0 10px 0; font-size: 14px; color: #666666;">
+                <strong style="color: #1a1a1a;">My Refuge</strong><br />
+                Giving Hope, Creating Impact
+              </p>
+              <p style="margin: 10px 0 0 0; font-size: 12px; color: #9E9E9E;">
+                PO Box 681, 1536 Sunset Blvd<br />
+                Bartlesville, OK, 74003
+              </p>
+            </td>
+          </tr>
+          
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+
