@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
 import { SparrowsClosetPage } from './pages/SparrowsClosetPage';
+import { PrivacyPage } from './pages/PrivacyPage';
 import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { ChangePassword } from './pages/ChangePassword';
@@ -25,6 +26,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/sparrows-closet" element={<SparrowsClosetPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route 
               path="/admin/change-password" 

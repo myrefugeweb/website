@@ -2,6 +2,134 @@
 
 import { supabase } from '../lib/supabase';
 
+// Analytics queue for batching requests
+interface QueuedEvent {
+  type: 'page_view' | 'event' | 'visitor_update';
+  data: any;
+  timestamp: number;
+}
+
+const ANALYTICS_QUEUE_KEY = 'analytics_queue';
+const BATCH_SIZE = 10; // Send batch when queue reaches this size
+const BATCH_INTERVAL = 30000; // Send batch every 30 seconds
+const MAX_QUEUE_SIZE = 100; // Prevent queue from growing too large
+
+let queue: QueuedEvent[] = [];
+let batchTimer: ReturnType<typeof setInterval> | null = null;
+let isProcessing = false;
+
+// Load queue from localStorage on init
+const loadQueue = (): QueuedEvent[] => {
+  try {
+    const stored = localStorage.getItem(ANALYTICS_QUEUE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+// Save queue to localStorage
+const saveQueue = (queue: QueuedEvent[]) => {
+  try {
+    localStorage.setItem(ANALYTICS_QUEUE_KEY, JSON.stringify(queue));
+  } catch (error) {
+    console.error('Error saving analytics queue:', error);
+  }
+};
+
+// Initialize queue from localStorage
+queue = loadQueue();
+
+// Process and send batched events
+const processQueue = async () => {
+  if (isProcessing || queue.length === 0) return;
+  
+  isProcessing = true;
+  const batch = queue.splice(0, BATCH_SIZE);
+  saveQueue(queue);
+
+  try {
+    const pageViews = batch.filter(e => e.type === 'page_view').map(e => e.data);
+    const events = batch.filter(e => e.type === 'event').map(e => e.data);
+    const visitorUpdates = batch.filter(e => e.type === 'visitor_update').map(e => e.data);
+
+    // Batch insert page views
+    if (pageViews.length > 0) {
+      const { error } = await supabase.from('page_views').insert(pageViews);
+      if (error) throw error;
+    }
+
+    // Batch insert events
+    if (events.length > 0) {
+      const { error } = await supabase.from('analytics_events').insert(events);
+      if (error) throw error;
+    }
+
+    // Process visitor updates (need to handle individually due to upsert logic)
+    for (const visitorData of visitorUpdates) {
+      await updateUniqueVisitor(
+        visitorData.visitor_id,
+        visitorData.device_type,
+        visitorData.browser
+      );
+    }
+  } catch (error) {
+    // If batch fails, put items back in queue (except if queue is too large)
+    if (queue.length < MAX_QUEUE_SIZE) {
+      queue = [...batch, ...queue];
+      saveQueue(queue);
+    }
+    console.error('Error processing analytics queue:', error);
+  } finally {
+    isProcessing = false;
+  }
+};
+
+// Start batch timer
+const startBatchTimer = () => {
+  if (batchTimer) return;
+  batchTimer = setInterval(() => {
+    if (queue.length > 0) {
+      processQueue();
+    }
+  }, BATCH_INTERVAL);
+};
+
+// Add event to queue
+const enqueue = (type: QueuedEvent['type'], data: any) => {
+  // Prevent queue from growing too large
+  if (queue.length >= MAX_QUEUE_SIZE) {
+    // Remove oldest events
+    queue = queue.slice(-MAX_QUEUE_SIZE + 1);
+  }
+
+  queue.push({
+    type,
+    data,
+    timestamp: Date.now(),
+  });
+  saveQueue(queue);
+
+  // Process immediately if batch size reached
+  if (queue.length >= BATCH_SIZE) {
+    processQueue();
+  }
+
+  // Start timer if not already running
+  startBatchTimer();
+};
+
+// Process queue on page unload (sendBeacon for reliability)
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
+    if (queue.length > 0) {
+      // Try to process queue before page closes
+      // Note: sendBeacon would require a server endpoint, so we use regular processing
+      processQueue();
+    }
+  });
+}
+
 // Generate or retrieve visitor ID
 export const getVisitorId = (): string => {
   let visitorId = localStorage.getItem('visitor_id');
@@ -66,7 +194,7 @@ export const parseUserAgent = () => {
   return { browser, browserVersion, os };
 };
 
-// Track page view
+// Track page view (now queued and batched)
 export const trackPageView = async (pagePath: string, pageTitle?: string) => {
   try {
     const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -80,7 +208,7 @@ export const trackPageView = async (pagePath: string, pageTitle?: string) => {
     const { browser, browserVersion, os } = parseUserAgent();
     const { data: { user } } = await supabase.auth.getUser();
 
-    await supabase.from('page_views').insert({
+    const pageViewData = {
       page_path: pagePath,
       page_title: pageTitle || document.title,
       referrer: document.referrer || null,
@@ -92,10 +220,17 @@ export const trackPageView = async (pagePath: string, pageTitle?: string) => {
       browser,
       browser_version: browserVersion,
       os,
-    });
+    };
 
-    // Update unique visitor
-    await updateUniqueVisitor(visitorId, deviceType, browser);
+    // Queue page view instead of inserting immediately
+    enqueue('page_view', pageViewData);
+
+    // Queue visitor update (will be processed in batch)
+    enqueue('visitor_update', {
+      visitor_id: visitorId,
+      device_type: deviceType,
+      browser,
+    });
   } catch (error) {
     // Silently fail - don't break the app if analytics fails
     console.error('Analytics error:', error);
@@ -144,7 +279,7 @@ const updateUniqueVisitor = async (
   }
 };
 
-// Track custom event
+// Track custom event (now queued and batched)
 export const trackEvent = async (
   eventType: string,
   eventName: string,
@@ -160,7 +295,7 @@ export const trackEvent = async (
     const sessionId = getSessionId();
     const { data: { user } } = await supabase.auth.getUser();
 
-    await supabase.from('analytics_events').insert({
+    const eventData = {
       event_type: eventType,
       event_name: eventName,
       page_path: window.location.pathname,
@@ -168,7 +303,10 @@ export const trackEvent = async (
       session_id: sessionId,
       visitor_id: visitorId,
       user_id: user?.id || null,
-    });
+    };
+
+    // Queue event instead of inserting immediately
+    enqueue('event', eventData);
   } catch (error) {
     console.error('Analytics event error:', error);
   }

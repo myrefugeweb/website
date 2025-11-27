@@ -39,10 +39,24 @@ export const Footer: React.FC = () => {
             <h4 className="footer__section-title">COMPANY</h4>
             <ul className="footer__links">
               <li>
-                <Link to="/about">About Us</Link>
+                <a href="/#about" onClick={(e) => {
+                  e.preventDefault();
+                  if (window.location.pathname === '/') {
+                    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    window.location.href = '/#about';
+                  }
+                }}>About Us</a>
               </li>
               <li>
-                <Link to="/contact">Contact</Link>
+                <a href="/#contact" onClick={(e) => {
+                  e.preventDefault();
+                  if (window.location.pathname === '/') {
+                    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    window.location.href = '/#contact';
+                  }
+                }}>Contact</a>
               </li>
               <li>
                 <a href="tel:918-766-3559">918-766-3559</a>
@@ -51,10 +65,17 @@ export const Footer: React.FC = () => {
           </div>
           <div className="footer__section">
             <h4 className="footer__section-title">ADDRESS</h4>
-            <p className="footer__address">
-              PO Box 681, 1536 Sunset Blvd<br />
-              Bartlesville, OK, 74003
-            </p>
+            <a 
+              href="https://maps.google.com/?q=1536+Sunset+Blvd+Bartlesville+OK+74003"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer__address-link"
+            >
+              <p className="footer__address">
+                PO Box 681, 1536 Sunset Blvd<br />
+                Bartlesville, OK, 74003
+              </p>
+            </a>
           </div>
         </div>
         <div className="footer__bottom">

@@ -1,0 +1,151 @@
+.privacy-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.privacy-page__main {
+  flex: 1;
+  padding: 4rem 2rem;
+  background: linear-gradient(180deg, #F8F9FA 0%, #FFFFFF 100%);
+}
+
+.privacy-page__container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.privacy-page__card {
+  width: 100%;
+}
+
+.privacy-page__title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.privacy-page__last-updated {
+  color: #757575;
+  font-size: 0.9375rem;
+  margin-bottom: 2rem;
+}
+
+.privacy-page__content {
+  margin-top: 2rem;
+}
+
+.privacy-page__section {
+  margin-bottom: 2.5rem;
+}
+
+.privacy-page__section h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+  letter-spacing: -0.01em;
+}
+
+.privacy-page__section h2:first-child {
+  margin-top: 0;
+}
+
+.privacy-page__section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #424242;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.privacy-page__section p {
+  color: #424242;
+  line-height: 1.75;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.privacy-page__section ul {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+  color: #424242;
+  line-height: 1.75;
+}
+
+.privacy-page__section li {
+  margin-bottom: 0.5rem;
+}
+
+.privacy-page__section strong {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.privacy-page__section a {
+  color: #007DFF;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.privacy-page__section a:hover {
+  color: #0066CC;
+  text-decoration: underline;
+}
+
+.privacy-page__contact {
+  background: #F5F5F5;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+.privacy-page__contact p {
+  margin-bottom: 0.5rem;
+}
+
+.privacy-page__contact a {
+  color: #007DFF;
+  text-decoration: none;
+}
+
+.privacy-page__contact a:hover {
+  text-decoration: underline;
+}
+
+.privacy-page__back {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #E8E8E8;
+}
+
+.privacy-page__back-link {
+  color: #007DFF;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: color 0.2s;
+  display: inline-block;
+}
+
+.privacy-page__back-link:hover {
+  color: #0066CC;
+}
+
+@media (max-width: 768px) {
+  .privacy-page__main {
+    padding: 2rem 1rem;
+  }
+
+  .privacy-page__title {
+    font-size: 2rem;
+  }
+
+  .privacy-page__section h2 {
+    font-size: 1.25rem;
+  }
+}
+

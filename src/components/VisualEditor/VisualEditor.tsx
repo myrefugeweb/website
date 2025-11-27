@@ -3,18 +3,8 @@ import { supabase } from '../../lib/supabase';
 import { Button } from '../Button';
 import { ImageLibrary } from '../ImageLibrary';
 import { LayoutPreview } from '../LayoutPreview';
-import { HeroSection } from '../HeroSection';
-import { StatsSection } from '../StatsSection';
-import { MissionSection } from '../MissionSection';
-import { StorySection } from '../StorySection';
-import { DonationBanner } from '../DonationBanner';
-import { HelpSection } from '../HelpSection';
-import { ImpactSection } from '../ImpactSection';
-import { SparrowsClosetSection } from '../SparrowsClosetSection';
-import { SponsorsSection } from '../SponsorsSection';
-import { CalendarSection } from '../CalendarSection';
-import { ContactSection } from '../ContactSection';
-import { Footer } from '../Footer';
+import { HomePage } from '../../pages/HomePage';
+import { SparrowsClosetPage } from '../../pages/SparrowsClosetPage';
 import './VisualEditor.css';
 
 // Section Layout Button Component
@@ -37,6 +27,10 @@ const SectionLayoutButton: React.FC<{ section: string; onSelect: () => void }> =
         donation: 'donation',
         sponsors: 'sponsors',
         'sparrows-closet': 'sparrows-closet',
+        'sparrows-closet-hero': 'sparrows-closet-hero',
+        'sparrows-closet-info': 'sparrows-closet-info',
+        'sparrows-closet-impact': 'sparrows-closet-impact',
+        'sparrows-closet-cta': 'sparrows-closet-cta',
       };
 
       const className = sectionClassMap[section] || section;
@@ -284,6 +278,7 @@ export const VisualEditor: React.FC = () => {
   const [showImageLibrary, setShowImageLibrary] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [sectionLayouts, setSectionLayouts] = useState<Record<string, string>>({});
+  const [currentPage, setCurrentPage] = useState<'home' | 'sparrows-closet'>('home');
   const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -294,7 +289,7 @@ export const VisualEditor: React.FC = () => {
         loadSectionLayouts();
       }, 500);
     }
-  }, [editMode]);
+  }, [editMode, currentPage]);
 
   const loadSectionLayouts = async () => {
     try {
@@ -644,6 +639,13 @@ export const VisualEditor: React.FC = () => {
         </div>
         <div className="visual-editor__toolbar-right">
           <Button
+            variant="secondary"
+            size="md"
+            onClick={() => setCurrentPage(currentPage === 'home' ? 'sparrows-closet' : 'home')}
+          >
+            {currentPage === 'home' ? '🦅 Sparrows Closet' : '🏠 My Refuge'}
+          </Button>
+          <Button
             variant="outline"
             size="md"
             onClick={() => setShowImageLibrary(true)}
@@ -687,31 +689,14 @@ export const VisualEditor: React.FC = () => {
           className={`visual-editor__preview ${editMode ? 'visual-editor__preview--edit-mode' : ''}`}
           onClick={handleElementClick}
         >
-          <div className="home-page">
-            <main>
-              <HeroSection />
-              <StatsSection />
-              <div id="about">
-                <MissionSection />
-              </div>
-              <StorySection />
-              <DonationBanner />
-              <div id="ways-to-give">
-                <HelpSection />
-              </div>
-              <ImpactSection />
-              <SparrowsClosetSection />
-              <SponsorsSection />
-              <CalendarSection />
-              <div id="contact">
-                <ContactSection />
-              </div>
-            </main>
-            <Footer />
-          </div>
+          {currentPage === 'home' ? (
+            <HomePage />
+          ) : (
+            <SparrowsClosetPage />
+          )}
         </div>
         
-        {editMode && (
+        {editMode && currentPage === 'home' && (
           <>
             <SectionLayoutButton section="hero" onSelect={() => setSelectedSection('hero')} />
             <SectionLayoutButton section="stats-section" onSelect={() => setSelectedSection('stats')} />
@@ -720,6 +705,14 @@ export const VisualEditor: React.FC = () => {
             <SectionLayoutButton section="help" onSelect={() => setSelectedSection('help')} />
             <SectionLayoutButton section="impact" onSelect={() => setSelectedSection('impact')} />
             <SectionLayoutButton section="contact" onSelect={() => setSelectedSection('contact')} />
+          </>
+        )}
+        {editMode && currentPage === 'sparrows-closet' && (
+          <>
+            <SectionLayoutButton section="sparrows-closet-hero" onSelect={() => setSelectedSection('sparrows-closet-hero')} />
+            <SectionLayoutButton section="sparrows-closet-info" onSelect={() => setSelectedSection('sparrows-closet-info')} />
+            <SectionLayoutButton section="sparrows-closet-impact" onSelect={() => setSelectedSection('sparrows-closet-impact')} />
+            <SectionLayoutButton section="sparrows-closet-cta" onSelect={() => setSelectedSection('sparrows-closet-cta')} />
           </>
         )}
       </div>

@@ -76,6 +76,17 @@
   min-height: 100vh;
 }
 
+/* Hide header and footer in visual editor preview */
+.visual-editor__preview .header,
+.visual-editor__preview header.header {
+  display: none !important;
+}
+
+.visual-editor__preview .footer,
+.visual-editor__preview footer.footer {
+  display: none !important;
+}
+
 .visual-editor__preview--edit-mode {
   cursor: crosshair;
 }
