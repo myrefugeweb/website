@@ -72,7 +72,10 @@ export const ChangePassword: React.FC = () => {
       // Clear the flag from localStorage
       localStorage.removeItem('must_change_password');
       
-      alert('Password changed successfully! Redirecting to dashboard...');
+      // Mark that onboarding should start after redirect
+      localStorage.setItem('start_onboarding', 'true');
+      
+      alert('Password changed successfully! Starting onboarding tour...');
       navigate('/admin/dashboard');
     } catch (err: any) {
       console.error('Password change error:', err);

@@ -6,6 +6,8 @@ import { supabase } from '../../lib/supabase';
 import type { CalendarEvent } from '../../lib/supabase';
 import { useUserRole } from '../../hooks/useUserRole';
 import { VisualEditor } from '../../components/VisualEditor';
+import { Onboarding } from '../../components/Onboarding/Onboarding';
+import { useOnboarding } from '../../contexts/OnboardingContext';
 import './AdminDashboard.css';
 
 type MainTab = 'visual-editor' | 'events' | 'analytics' | 'admin';
@@ -18,6 +20,15 @@ export const AdminDashboard: React.FC = () => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
   const { userRole, isSuperAdmin: isSuperAdminRole, loading: roleLoading } = useUserRole();
+  
+  // Get onboarding context (may not be available if not wrapped in provider)
+  let onboardingContext;
+  try {
+    onboardingContext = useOnboarding();
+  } catch (error) {
+    // Onboarding context not available, that's okay
+    onboardingContext = null;
+  }
 
   useEffect(() => {
     const loadUser = async () => {
@@ -70,6 +81,16 @@ export const AdminDashboard: React.FC = () => {
     }
   }, [showProfileDropdown]);
 
+  // Expose setActiveMainTab to window for onboarding navigation
+  useEffect(() => {
+    (window as any).__adminDashboardSetTab = (tab: MainTab) => {
+      setActiveMainTab(tab);
+    };
+    return () => {
+      delete (window as any).__adminDashboardSetTab;
+    };
+  }, []);
+
   if (loading || roleLoading || !user) {
     return <div className="admin-dashboard__loading">Loading...</div>;
   }
@@ -110,6 +131,22 @@ export const AdminDashboard: React.FC = () => {
                   </svg>
                   Profile Settings
                 </button>
+                {onboardingContext && (
+                  <button
+                    className="admin-dashboard__profile-dropdown-item"
+                    onClick={() => {
+                      onboardingContext.startOnboarding();
+                      setShowProfileDropdown(false);
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Start Onboarding Tour
+                  </button>
+                )}
                 <button
                   className="admin-dashboard__profile-dropdown-item"
                   onClick={handleLogout}
@@ -131,18 +168,21 @@ export const AdminDashboard: React.FC = () => {
         <button
           className={`admin-dashboard__main-tab ${activeMainTab === 'visual-editor' ? 'active' : ''}`}
           onClick={() => setActiveMainTab('visual-editor')}
+          data-tab="visual-editor"
         >
           🎨 Visual Editor
         </button>
         <button
           className={`admin-dashboard__main-tab ${activeMainTab === 'events' ? 'active' : ''}`}
           onClick={() => setActiveMainTab('events')}
+          data-tab="events"
         >
           📅 Events
         </button>
         <button
           className={`admin-dashboard__main-tab ${activeMainTab === 'analytics' ? 'active' : ''}`}
           onClick={() => setActiveMainTab('analytics')}
+          data-tab="analytics"
         >
           📊 Analytics
         </button>
@@ -150,6 +190,7 @@ export const AdminDashboard: React.FC = () => {
           <button
             className={`admin-dashboard__main-tab ${activeMainTab === 'admin' ? 'active' : ''}`}
             onClick={() => setActiveMainTab('admin')}
+            data-tab="admin"
           >
             👑 Admin
           </button>
@@ -175,6 +216,8 @@ export const AdminDashboard: React.FC = () => {
           onClose={() => setShowProfileSettings(false)}
         />
       )}
+
+      <Onboarding />
     </div>
   );
 };
@@ -1439,10 +1482,21 @@ const AnalyticsTab: React.FC = () => {
   const loadAnalytics = async () => {
     setLoading(true);
     try {
+      // Fix: Create new Date objects for each calculation to avoid mutation issues
       const now = new Date();
-      const todayStart = new Date(now.setHours(0, 0, 0, 0)).toISOString();
-      const weekStart = new Date(now.setDate(now.getDate() - 7)).toISOString();
-      const monthStart = new Date(now.setMonth(now.getMonth() - 1)).toISOString();
+      
+      // Today start (midnight today)
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).toISOString();
+      
+      // Week start (7 days ago from now)
+      const weekStartDate = new Date(now);
+      weekStartDate.setDate(weekStartDate.getDate() - 7);
+      const weekStart = weekStartDate.toISOString();
+      
+      // Month start (30 days ago from now for consistency with "Last 30 Days" labels)
+      const monthStartDate = new Date(now);
+      monthStartDate.setDate(monthStartDate.getDate() - 30);
+      const monthStart = monthStartDate.toISOString();
 
       // Page views
       const { count: pageViewsToday } = await supabase
@@ -1464,21 +1518,28 @@ const AnalyticsTab: React.FC = () => {
         .from('page_views')
         .select('*', { count: 'exact', head: true });
 
-      // Unique visitors
-      const { count: visitorsToday } = await supabase
-        .from('unique_visitors')
-        .select('*', { count: 'exact', head: true })
-        .gte('last_visit_at', todayStart);
+      // Unique visitors - count distinct visitors who visited in each time period
+      // We need to join with page_views to get accurate counts per time period
+      const { data: visitorsTodayData } = await supabase
+        .from('page_views')
+        .select('visitor_id')
+        .gte('created_at', todayStart);
+      
+      const visitorsToday = new Set(visitorsTodayData?.map(pv => pv.visitor_id) || []).size;
 
-      const { count: visitorsWeek } = await supabase
-        .from('unique_visitors')
-        .select('*', { count: 'exact', head: true })
-        .gte('last_visit_at', weekStart);
+      const { data: visitorsWeekData } = await supabase
+        .from('page_views')
+        .select('visitor_id')
+        .gte('created_at', weekStart);
+      
+      const visitorsWeek = new Set(visitorsWeekData?.map(pv => pv.visitor_id) || []).size;
 
-      const { count: visitorsMonth } = await supabase
-        .from('unique_visitors')
-        .select('*', { count: 'exact', head: true })
-        .gte('last_visit_at', monthStart);
+      const { data: visitorsMonthData } = await supabase
+        .from('page_views')
+        .select('visitor_id')
+        .gte('created_at', monthStart);
+      
+      const visitorsMonth = new Set(visitorsMonthData?.map(pv => pv.visitor_id) || []).size;
 
       const { count: visitorsTotal } = await supabase
         .from('unique_visitors')

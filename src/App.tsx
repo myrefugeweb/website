@@ -9,6 +9,7 @@ import { ChangePassword } from './pages/ChangePassword';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAnalytics } from './hooks/useAnalytics';
 import { StagingProvider } from './contexts/StagingContext';
+import { OnboardingProvider } from './contexts/OnboardingContext';
 import './styles/global.css';
 
 // Analytics wrapper component
@@ -90,7 +91,9 @@ function App() {
               path="/admin/dashboard" 
               element={
                 <ProtectedRoute>
-                  <AdminDashboard />
+                  <OnboardingProvider>
+                    <AdminDashboard />
+                  </OnboardingProvider>
                 </ProtectedRoute>
               } 
             />

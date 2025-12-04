@@ -19,7 +19,7 @@
   padding: 1.5rem 2rem;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 10000;
 }
 
 .admin-dashboard__header-content {
@@ -48,6 +48,7 @@
 /* Profile Dropdown Styles */
 .admin-dashboard__profile-container {
   position: relative;
+  z-index: 10001;
 }
 
 .admin-dashboard__profile-button {
@@ -86,7 +87,7 @@
   border: 1px solid rgba(0, 0, 0, 0.08);
   min-width: 200px;
   overflow: hidden;
-  z-index: 1000;
+  z-index: 10000;
   animation: dropdownFadeIn 0.2s ease-out;
 }
 

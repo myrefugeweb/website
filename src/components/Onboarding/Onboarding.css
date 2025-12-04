@@ -1,0 +1,177 @@
+.onboarding__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  pointer-events: none; /* Allow clicks to pass through */
+}
+
+.onboarding__highlight {
+  border: 3px solid #007DFF;
+  border-radius: 8px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 125, 255, 0.5);
+  pointer-events: none;
+  z-index: 10002; /* Higher than modals (which are usually 10000-10001) */
+  transition: all 0.3s ease;
+  transform: translateZ(0); /* Force hardware acceleration */
+}
+
+.onboarding__tooltip {
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  padding: 1.5rem;
+  max-width: 400px;
+  min-width: 320px;
+  pointer-events: auto;
+  /* Remove conflicting width - let inline styles handle it */
+}
+
+.onboarding__tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.onboarding__tooltip-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  flex: 1;
+  min-width: 0; /* Allow text to wrap */
+}
+
+.onboarding__tooltip-step {
+  font-size: 0.875rem;
+  color: #757575;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.onboarding__tooltip-description {
+  font-size: 1rem;
+  color: #4a4a4a;
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+  word-wrap: break-word;
+}
+
+.onboarding__tooltip-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.onboarding__nav-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.onboarding__skip-btn {
+  color: #757575;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .onboarding__tooltip {
+    max-width: calc(100vw - 2rem);
+    min-width: auto;
+    width: calc(100vw - 2rem);
+    padding: 1.25rem;
+    margin: 0;
+    border-radius: 12px 12px 0 0; /* Rounded top corners only on mobile */
+  }
+
+  .onboarding__tooltip-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .onboarding__tooltip-title {
+    font-size: 1.1rem;
+    width: 100%;
+  }
+
+  .onboarding__tooltip-step {
+    font-size: 0.8rem;
+    align-self: flex-end;
+  }
+
+  .onboarding__tooltip-description {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0 0 1.25rem 0;
+  }
+
+  .onboarding__tooltip-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .onboarding__skip-btn {
+    width: 100%;
+    order: 3; /* Move skip to bottom on mobile */
+  }
+
+  .onboarding__nav-buttons {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+    order: 1; /* Move nav buttons to top */
+  }
+
+  .onboarding__nav-buttons .button {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .onboarding__highlight {
+    border-width: 2px;
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .onboarding__tooltip {
+    padding: 1rem;
+    max-width: calc(100vw - 1rem);
+    width: calc(100vw - 1rem);
+  }
+
+  .onboarding__tooltip-title {
+    font-size: 1rem;
+  }
+
+  .onboarding__tooltip-description {
+    font-size: 0.9rem;
+    margin: 0 0 1rem 0;
+  }
+
+  .onboarding__tooltip-step {
+    font-size: 0.75rem;
+  }
+
+  .onboarding__nav-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .onboarding__nav-buttons .button {
+    width: 100%;
+  }
+}
+

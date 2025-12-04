@@ -6,6 +6,7 @@ import { LayoutPreview } from '../LayoutPreview';
 import { HomePage } from '../../pages/HomePage';
 import { SparrowsClosetPage } from '../../pages/SparrowsClosetPage';
 import { StagingProvider } from '../../contexts/StagingContext';
+import { useOnboarding } from '../../contexts/OnboardingContext';
 import './VisualEditor.css';
 
 // Section Layout Button Component
@@ -551,8 +552,16 @@ export const VisualEditor: React.FC = () => {
     }
   };
 
+  const { isOnboarding } = useOnboarding();
+
   const handlePublishAll = async () => {
     if (unpublishedSections.size === 0) {
+      return;
+    }
+
+    // Prevent publishing during onboarding (demo mode)
+    if (isOnboarding) {
+      alert('🎓 Demo Mode: Publishing is disabled during onboarding. Your changes are saved but won\'t be published until you complete the tour!');
       return;
     }
 
@@ -1133,7 +1142,9 @@ export const VisualEditor: React.FC = () => {
       <div className="visual-editor__toolbar">
         <div className="visual-editor__toolbar-left">
           <h2 className="visual-editor__title">Visual Editor</h2>
-          <p className="visual-editor__subtitle">Click on any text or image to edit it</p>
+          <p className="visual-editor__subtitle">
+            {isOnboarding ? '🎓 Demo Mode - Learn by doing! Nothing will be published.' : 'Click on any text or image to edit it'}
+          </p>
         </div>
         <div className="visual-editor__toolbar-right">
           {unpublishedSections.size > 0 && (
