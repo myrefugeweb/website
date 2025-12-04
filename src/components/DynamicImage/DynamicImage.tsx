@@ -36,18 +36,25 @@ export const DynamicImage: React.FC<DynamicImageProps> = ({
           return;
         }
 
-        // In staging mode, use is_active (draft)
-        // In public mode, use published_is_active (published)
-        const activeField = stagingMode ? 'is_active' : 'published_is_active';
-
+        // Fetch all images for this section (PostgREST has issues filtering on published_is_active)
+        // We'll filter client-side based on staging mode
         const { data, error } = await supabase
           .from('images')
-          .select('url, alt_text')
+          .select('url, alt_text, is_active, published_is_active')
           .eq('section', section)
-          .eq(activeField, true)
-          .order('order_index', { ascending: true })
-          .limit(1)
-          .single();
+          .order('order_index', { ascending: true });
+
+        // Filter client-side based on staging mode
+        let filteredData = null;
+        if (data && data.length > 0) {
+          if (stagingMode) {
+            // In staging mode, use is_active (draft)
+            filteredData = data.find(img => img.is_active === true);
+          } else {
+            // In public mode, use published_is_active (published)
+            filteredData = data.find(img => img.published_is_active === true);
+          }
+        }
 
         // PGRST116 is "no rows returned" - this is expected if no image exists
         // 406 errors are RLS policy issues - handled gracefully by showing placeholder
@@ -66,8 +73,8 @@ export const DynamicImage: React.FC<DynamicImageProps> = ({
           }
         }
 
-        if (data) {
-          setImageUrl(data.url);
+        if (filteredData) {
+          setImageUrl(filteredData.url);
         }
       } catch (error: any) {
         // Silently handle errors - just show placeholder
