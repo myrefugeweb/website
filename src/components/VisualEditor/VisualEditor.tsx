@@ -632,9 +632,13 @@ export const VisualEditor: React.FC = () => {
         }
       }
 
+      // Reload all unpublished changes to update the UI
+      await loadAllUnpublishedChanges();
+      
+      // Clear unpublished sections (should be empty now)
       setUnpublishedSections(new Set());
-      // Reload to show published changes
-      window.location.reload();
+      
+      // No need to reload - the state update will refresh the UI
     } catch (error: any) {
       console.error('Error publishing changes:', error);
       setPublishError(error.message || 'Failed to publish changes. Please try again.');
