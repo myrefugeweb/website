@@ -36,30 +36,42 @@ export const DynamicImage: React.FC<DynamicImageProps> = ({
           return;
         }
 
-        // Fetch all images for this section (PostgREST has issues filtering on published_is_active)
-        // We'll filter client-side based on staging mode
-        const { data, error } = await supabase
+        // Fetch all images for this section
+        // Try to get both is_active and published_is_active, but fallback to just is_active if needed
+        let query = supabase
           .from('images')
           .select('url, alt_text, is_active, published_is_active')
           .eq('section', section)
           .order('order_index', { ascending: true });
 
-        // Filter client-side based on staging mode
-        let filteredData = null;
-        if (data && data.length > 0) {
-          if (stagingMode) {
-            // In staging mode, use is_active (draft)
-            filteredData = data.find(img => img.is_active === true);
-          } else {
-            // In public mode, use published_is_active (published)
-            filteredData = data.find(img => img.published_is_active === true);
-          }
-        }
+        const { data, error } = await query;
 
-        // PGRST116 is "no rows returned" - this is expected if no image exists
-        // 406 errors are RLS policy issues - handled gracefully by showing placeholder
-        // Suppress these errors in console to avoid spam
+        // Log errors for debugging
         if (error) {
+          console.error(`[DynamicImage ${section}] Query error:`, error);
+          
+          // If the error is about missing columns, try a simpler query
+          if (error.message?.includes('column') || error.code === '42703') {
+            console.warn(`[DynamicImage ${section}] Retrying with simpler query (is_active only)`);
+            const { data: simpleData, error: simpleError } = await supabase
+              .from('images')
+              .select('url, alt_text, is_active')
+              .eq('section', section)
+              .eq('is_active', true)
+              .order('order_index', { ascending: true })
+              .limit(1)
+              .maybeSingle();
+            
+            if (simpleError) {
+              console.error(`[DynamicImage ${section}] Simple query also failed:`, simpleError);
+            } else if (simpleData) {
+              setImageUrl(simpleData.url);
+              setLoading(false);
+              return;
+            }
+          }
+          
+          // For other errors, check if they're expected
           const isExpectedError = 
             error.code === 'PGRST116' || // No rows returned
             error.code === 'PGRST301' || // Not found
@@ -67,14 +79,43 @@ export const DynamicImage: React.FC<DynamicImageProps> = ({
             error.message?.includes('JWT') || // Auth issue
             error.message?.includes('key'); // Config issue
           
-          // Only log unexpected errors
           if (!isExpectedError) {
-            console.error('Error loading image:', error);
+            console.error(`[DynamicImage ${section}] Unexpected error:`, error);
           }
         }
 
+        // Filter client-side based on staging mode
+        let filteredData = null;
+        if (data && data.length > 0) {
+          console.log(`[DynamicImage ${section}] Found ${data.length} image(s), stagingMode: ${stagingMode}`);
+          
+          if (stagingMode) {
+            // In staging mode, use is_active (draft)
+            filteredData = data.find(img => img.is_active === true);
+            console.log(`[DynamicImage ${section}] Staging mode - looking for is_active=true`);
+          } else {
+            // In public mode, try published_is_active first, fallback to is_active
+            filteredData = data.find(img => {
+              // Check if published_is_active exists and is true
+              if (img.published_is_active !== undefined && img.published_is_active !== null) {
+                return img.published_is_active === true;
+              }
+              // Fallback: if published_is_active doesn't exist or is null, use is_active
+              return img.is_active === true;
+            });
+            console.log(`[DynamicImage ${section}] Public mode - looking for published_is_active=true or is_active=true`);
+          }
+          
+          console.log(`[DynamicImage ${section}] Filtered result:`, filteredData ? filteredData.url : 'none');
+        } else {
+          console.log(`[DynamicImage ${section}] No data returned from query`);
+        }
+
         if (filteredData) {
+          console.log(`[DynamicImage ${section}] Found image:`, filteredData.url);
           setImageUrl(filteredData.url);
+        } else {
+          console.warn(`[DynamicImage ${section}] No matching image found. Data:`, data);
         }
       } catch (error: any) {
         // Silently handle errors - just show placeholder
