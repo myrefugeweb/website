@@ -132,6 +132,88 @@
   }
 }
 
+/* Layout 2: Text Left, Image Right */
+.sparrows-closet--layout-2 .sparrows-closet__container {
+  grid-template-columns: 1fr 1fr;
+}
+
+.sparrows-closet--layout-2 .sparrows-closet__content {
+  order: 1;
+}
+
+.sparrows-closet--layout-2 .sparrows-closet__image {
+  order: 2;
+}
+
+/* Layout 3: Centered Content with Image Background */
+.sparrows-closet--layout-3 {
+  position: relative;
+  overflow: hidden;
+}
+
+.sparrows-closet--layout-3 .sparrows-closet__background-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.sparrows-closet--layout-3 .sparrows-closet__background-image img,
+.sparrows-closet--layout-3 .sparrows-closet__bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sparrows-closet--layout-3 .sparrows-closet__bg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.85) 0%, rgba(185, 28, 28, 0.9) 100%);
+}
+
+.sparrows-closet--layout-3 .sparrows-closet__container {
+  position: relative;
+  z-index: 1;
+  grid-template-columns: 1fr;
+  text-align: center;
+}
+
+.sparrows-closet--layout-3 .sparrows-closet__content--centered {
+  max-width: 800px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 3rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.sparrows-closet--layout-3 .sparrows-closet__title--centered {
+  text-align: center;
+}
+
+.sparrows-closet--layout-3 .sparrows-closet__text--centered {
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .sparrows-closet--layout-2 .sparrows-closet__container {
+    grid-template-columns: 1fr;
+  }
+
+  .sparrows-closet--layout-2 .sparrows-closet__content {
+    order: 1;
+  }
+
+  .sparrows-closet--layout-2 .sparrows-closet__image {
+    order: 2;
+  }
+}
+
 @media (max-width: 768px) {
   .sparrows-closet {
     padding: 5rem 1.5rem;
@@ -139,6 +221,10 @@
 
   .sparrows-closet__container {
     gap: 3rem;
+  }
+
+  .sparrows-closet--layout-3 .sparrows-closet__content--centered {
+    padding: 2rem;
   }
 }
 

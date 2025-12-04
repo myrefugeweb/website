@@ -1,9 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { DynamicImage } from '../DynamicImage';
+import { useSectionLayout } from '../../hooks/useSectionLayout';
 import './StorySection.css';
 
 export const StorySection: React.FC = () => {
+  const { layout } = useSectionLayout('story');
+  
   const stories = [
     {
       title: 'A Place of Hope',
@@ -22,49 +25,151 @@ export const StorySection: React.FC = () => {
     }
   ];
 
-  return (
-    <section className="story-section">
-      <div className="story-section__container">
-        <motion.div
-          className="story-section__header"
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <h2 className="story-section__title">Our Story</h2>
-          <p className="story-section__subtitle">
-            Every child deserves a place to belong. Every family deserves support. 
-            Every community deserves hope.
-          </p>
-        </motion.div>
+  // Layout 1: Vertical Stack (Default)
+  if (layout === 'default' || layout === 'layout-1') {
+    return (
+      <section className="story-section story-section--layout-1">
+        <div className="story-section__container">
+          <motion.div
+            className="story-section__header"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-100px' }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <h2 className="story-section__title">Our Story</h2>
+            <p className="story-section__subtitle">
+              Every child deserves a place to belong. Every family deserves support. 
+              Every community deserves hope.
+            </p>
+          </motion.div>
 
-        <div className="story-section__stories">
-          {stories.map((story, index) => (
-            <motion.div
-              key={index}
-              className="story-section__story"
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ 
-                duration: 0.8, 
-                delay: index * 0.15, 
-                ease: [0.16, 1, 0.3, 1] 
-              }}
-            >
-              <div className="story-section__story-image">
-                <DynamicImage section={story.image} />
-              </div>
-              <div className="story-section__story-content">
-                <h3 className="story-section__story-title">{story.title}</h3>
-                <p className="story-section__story-text">{story.content}</p>
-              </div>
-            </motion.div>
-          ))}
+          <div className="story-section__stories">
+            {stories.map((story, index) => (
+              <motion.div
+                key={index}
+                className="story-section__story"
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: index * 0.15, 
+                  ease: [0.16, 1, 0.3, 1] 
+                }}
+              >
+                <div className="story-section__story-image">
+                  <DynamicImage section={story.image} />
+                </div>
+                <div className="story-section__story-content">
+                  <h3 className="story-section__story-title">{story.title}</h3>
+                  <p className="story-section__story-text">{story.content}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
-  );
+      </section>
+    );
+  }
+
+  // Layout 2: Grid Layout (3 columns)
+  if (layout === 'layout-2') {
+    return (
+      <section className="story-section story-section--layout-2">
+        <div className="story-section__container">
+          <motion.div
+            className="story-section__header"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-100px' }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <h2 className="story-section__title">Our Story</h2>
+            <p className="story-section__subtitle">
+              Every child deserves a place to belong. Every family deserves support. 
+              Every community deserves hope.
+            </p>
+          </motion.div>
+
+          <div className="story-section__stories story-section__stories--grid">
+            {stories.map((story, index) => (
+              <motion.div
+                key={index}
+                className="story-section__story story-section__story--card"
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: index * 0.15, 
+                  ease: [0.16, 1, 0.3, 1] 
+                }}
+              >
+                <div className="story-section__story-image">
+                  <DynamicImage section={story.image} />
+                </div>
+                <div className="story-section__story-content">
+                  <h3 className="story-section__story-title">{story.title}</h3>
+                  <p className="story-section__story-text">{story.content}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Layout 3: Alternating Side-by-Side
+  if (layout === 'layout-3') {
+    return (
+      <section className="story-section story-section--layout-3">
+        <div className="story-section__container">
+          <motion.div
+            className="story-section__header"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-100px' }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <h2 className="story-section__title">Our Story</h2>
+            <p className="story-section__subtitle">
+              Every child deserves a place to belong. Every family deserves support. 
+              Every community deserves hope.
+            </p>
+          </motion.div>
+
+          <div className="story-section__stories">
+            {stories.map((story, index) => (
+              <motion.div
+                key={index}
+                className={`story-section__story story-section__story--alternating ${index % 2 === 0 ? 'story-section__story--left' : 'story-section__story--right'}`}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: index * 0.15, 
+                  ease: [0.16, 1, 0.3, 1] 
+                }}
+              >
+                <div className="story-section__story-image">
+                  <DynamicImage section={story.image} />
+                </div>
+                <div className="story-section__story-content">
+                  <h3 className="story-section__story-title">{story.title}</h3>
+                  <p className="story-section__story-text">{story.content}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Fallback to default
+  return null;
 };
 

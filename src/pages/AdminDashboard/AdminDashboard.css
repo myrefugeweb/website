@@ -45,6 +45,113 @@
   font-weight: 400;
 }
 
+/* Profile Dropdown Styles */
+.admin-dashboard__profile-container {
+  position: relative;
+}
+
+.admin-dashboard__profile-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #E8E8E8;
+  background: #FFFFFF;
+  color: #757575;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+}
+
+.admin-dashboard__profile-button:hover {
+  border-color: #007DFF;
+  color: #007DFF;
+  background: rgba(0, 125, 255, 0.05);
+  transform: scale(1.05);
+}
+
+.admin-dashboard__profile-button:active {
+  transform: scale(0.95);
+}
+
+.admin-dashboard__profile-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: #FFFFFF;
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  min-width: 200px;
+  overflow: hidden;
+  z-index: 1000;
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-dashboard__profile-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #424242;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-dashboard__profile-dropdown-item:hover {
+  background: rgba(0, 125, 255, 0.05);
+  color: #007DFF;
+}
+
+.admin-dashboard__profile-dropdown-item:first-child {
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+}
+
+.admin-dashboard__profile-dropdown-item:last-child {
+  border-bottom-left-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+}
+
+.admin-dashboard__profile-dropdown-item svg {
+  flex-shrink: 0;
+}
+
+/* Profile Modal Styles */
+.admin-dashboard__profile-modal {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 .admin-dashboard__main-tabs {
   background: #FFFFFF;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);

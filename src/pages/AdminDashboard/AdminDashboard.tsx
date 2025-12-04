@@ -15,6 +15,8 @@ export const AdminDashboard: React.FC = () => {
   const [activeMainTab, setActiveMainTab] = useState<MainTab>('visual-editor');
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showProfileSettings, setShowProfileSettings] = useState(false);
   const { userRole, isSuperAdmin: isSuperAdminRole, loading: roleLoading } = useUserRole();
 
   useEffect(() => {
@@ -53,6 +55,21 @@ export const AdminDashboard: React.FC = () => {
     navigate('/admin');
   };
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.admin-dashboard__profile-container')) {
+        setShowProfileDropdown(false);
+      }
+    };
+
+    if (showProfileDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showProfileDropdown]);
+
   if (loading || roleLoading || !user) {
     return <div className="admin-dashboard__loading">Loading...</div>;
   }
@@ -67,9 +84,46 @@ export const AdminDashboard: React.FC = () => {
             <h1 className="admin-dashboard__title">Admin Dashboard</h1>
             <p className="admin-dashboard__subtitle">Welcome back, {user.email}</p>
           </div>
-          <Button variant="outline" size="md" onClick={handleLogout}>
-            Logout
-          </Button>
+          <div className="admin-dashboard__profile-container">
+            <button
+              className="admin-dashboard__profile-button"
+              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+              aria-label="Profile menu"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M20.59 22C20.59 18.13 16.74 15 12 15C7.26 15 3.41 18.13 3.41 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            {showProfileDropdown && (
+              <div className="admin-dashboard__profile-dropdown">
+                <button
+                  className="admin-dashboard__profile-dropdown-item"
+                  onClick={() => {
+                    setShowProfileSettings(true);
+                    setShowProfileDropdown(false);
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M20.59 22C20.59 18.13 16.74 15 12 15C7.26 15 3.41 18.13 3.41 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Profile Settings
+                </button>
+                <button
+                  className="admin-dashboard__profile-dropdown-item"
+                  onClick={handleLogout}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -114,6 +168,13 @@ export const AdminDashboard: React.FC = () => {
         {activeMainTab === 'analytics' && <AnalyticsTab />}
         {activeMainTab === 'admin' && isSuperAdmin && <SuperAdminTab />}
       </div>
+
+      {showProfileSettings && (
+        <ProfileSettingsModal
+          user={user}
+          onClose={() => setShowProfileSettings(false)}
+        />
+      )}
     </div>
   );
 };
@@ -857,6 +918,334 @@ const SectionEditor: React.FC<{ section: SectionType; siteTab: SiteTab }> = ({ s
   );
 };
 */
+
+// Profile Settings Modal Component
+const ProfileSettingsModal: React.FC<{ user: any; onClose: () => void }> = ({ user, onClose }) => {
+  const [email, setEmail] = useState(user?.email || '');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
+
+  const handleUpdateEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({
+        email: email,
+      });
+
+      if (updateError) {
+        setError(updateError.message || 'Failed to update email.');
+        setLoading(false);
+        return;
+      }
+
+      setSuccess('Email update request sent! Please check your email to confirm the change.');
+      setLoading(false);
+    } catch (err: any) {
+      console.error('Email update error:', err);
+      setError(err.message || 'An error occurred. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match.');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (updateError) {
+        setError(updateError.message || 'Failed to update password.');
+        setLoading(false);
+        return;
+      }
+
+      setSuccess('Password changed successfully!');
+      setNewPassword('');
+      setConfirmPassword('');
+      setLoading(false);
+    } catch (err: any) {
+      console.error('Password change error:', err);
+      setError(err.message || 'An error occurred. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div
+      className="admin-dashboard__modal-overlay"
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.6)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10000,
+        padding: '2rem',
+        backdropFilter: 'blur(4px)',
+      }}
+    >
+      <div
+        className="admin-dashboard__profile-modal"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: '#FFFFFF',
+          borderRadius: '1rem',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+          maxWidth: '600px',
+          width: '100%',
+          maxHeight: '90vh',
+          overflow: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '1.5rem 2rem',
+          borderBottom: '1px solid #E8E8E8',
+        }}>
+          <h3 style={{
+            fontSize: '1.5rem',
+            fontWeight: 700,
+            color: '#1a1a1a',
+            margin: 0,
+          }}>
+            Profile Settings
+          </h3>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              fontSize: '2rem',
+              color: '#757575',
+              cursor: 'pointer',
+              lineHeight: 1,
+              padding: 0,
+              width: '2rem',
+              height: '2rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '0.5rem',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#F5F5F5';
+              e.currentTarget.style.color = '#1a1a1a';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#757575';
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        <div style={{
+          display: 'flex',
+          borderBottom: '1px solid #E8E8E8',
+        }}>
+          <button
+            onClick={() => setActiveTab('profile')}
+            style={{
+              flex: 1,
+              padding: '1rem',
+              background: activeTab === 'profile' ? '#FFFFFF' : 'transparent',
+              border: 'none',
+              borderBottom: activeTab === 'profile' ? '3px solid #007DFF' : '3px solid transparent',
+              fontSize: '0.9375rem',
+              fontWeight: 600,
+              color: activeTab === 'profile' ? '#007DFF' : '#757575',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            Profile
+          </button>
+          <button
+            onClick={() => setActiveTab('password')}
+            style={{
+              flex: 1,
+              padding: '1rem',
+              background: activeTab === 'password' ? '#FFFFFF' : 'transparent',
+              border: 'none',
+              borderBottom: activeTab === 'password' ? '3px solid #007DFF' : '3px solid transparent',
+              fontSize: '0.9375rem',
+              fontWeight: 600,
+              color: activeTab === 'password' ? '#007DFF' : '#757575',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            Change Password
+          </button>
+        </div>
+
+        <div style={{
+          padding: '2rem',
+        }}>
+          {error && (
+            <div style={{
+              padding: '1rem',
+              background: '#FFEBEE',
+              border: '1px solid #EF5350',
+              borderRadius: '0.5rem',
+              color: '#C62828',
+              marginBottom: '1.5rem',
+              fontSize: '0.9375rem',
+            }}>
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div style={{
+              padding: '1rem',
+              background: '#E8F5E9',
+              border: '1px solid #4CAF50',
+              borderRadius: '0.5rem',
+              color: '#2E7D32',
+              marginBottom: '1.5rem',
+              fontSize: '0.9375rem',
+            }}>
+              {success}
+            </div>
+          )}
+
+          {activeTab === 'profile' && (
+            <form onSubmit={handleUpdateEmail}>
+              <div className="admin-dashboard__field" style={{ marginBottom: '1.5rem' }}>
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your.email@example.com"
+                  required
+                />
+                <p style={{
+                  fontSize: '0.875rem',
+                  color: '#757575',
+                  marginTop: '0.5rem',
+                  marginBottom: 0,
+                }}>
+                  Changing your email will require confirmation via email.
+                </p>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                justifyContent: 'flex-end',
+              }}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="md"
+                  onClick={onClose}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="md"
+                  disabled={loading || email === user?.email}
+                >
+                  {loading ? 'Updating...' : 'Update Email'}
+                </Button>
+              </div>
+            </form>
+          )}
+
+          {activeTab === 'password' && (
+            <form onSubmit={handleChangePassword}>
+              <div className="admin-dashboard__field" style={{ marginBottom: '1.5rem' }}>
+                <label>New Password</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Minimum 6 characters"
+                  required
+                  minLength={6}
+                />
+              </div>
+
+              <div className="admin-dashboard__field" style={{ marginBottom: '1.5rem' }}>
+                <label>Confirm New Password</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter your new password"
+                  required
+                  minLength={6}
+                />
+              </div>
+
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                justifyContent: 'flex-end',
+              }}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="md"
+                  onClick={onClose}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="md"
+                  disabled={loading || !newPassword || !confirmPassword}
+                >
+                  {loading ? 'Changing...' : 'Change Password'}
+                </Button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Events Tab Component
 const EventsTab: React.FC = () => {

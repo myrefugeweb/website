@@ -8,6 +8,7 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { ChangePassword } from './pages/ChangePassword';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAnalytics } from './hooks/useAnalytics';
+import { StagingProvider } from './contexts/StagingContext';
 import './styles/global.css';
 
 // Analytics wrapper component
@@ -52,9 +53,30 @@ function App() {
         <AnalyticsWrapper>
           <RedirectHandler />
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/sparrows-closet" element={<SparrowsClosetPage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route 
+              path="/" 
+              element={
+                <StagingProvider stagingMode={false}>
+                  <HomePage />
+                </StagingProvider>
+              } 
+            />
+            <Route 
+              path="/sparrows-closet" 
+              element={
+                <StagingProvider stagingMode={false}>
+                  <SparrowsClosetPage />
+                </StagingProvider>
+              } 
+            />
+            <Route 
+              path="/privacy" 
+              element={
+                <StagingProvider stagingMode={false}>
+                  <PrivacyPage />
+                </StagingProvider>
+              } 
+            />
             <Route path="/admin" element={<AdminLogin />} />
             <Route 
               path="/admin/change-password" 

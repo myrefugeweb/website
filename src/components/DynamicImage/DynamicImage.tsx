@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { useStagingMode } from '../../contexts/StagingContext';
 import './DynamicImage.css';
 
 export interface DynamicImageProps {
@@ -17,6 +18,7 @@ export const DynamicImage: React.FC<DynamicImageProps> = ({
 }) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const { stagingMode } = useStagingMode();
 
   useEffect(() => {
     const loadImage = async () => {
@@ -34,11 +36,15 @@ export const DynamicImage: React.FC<DynamicImageProps> = ({
           return;
         }
 
+        // In staging mode, use is_active (draft)
+        // In public mode, use published_is_active (published)
+        const activeField = stagingMode ? 'is_active' : 'published_is_active';
+
         const { data, error } = await supabase
           .from('images')
           .select('url, alt_text')
           .eq('section', section)
-          .eq('is_active', true)
+          .eq(activeField, true)
           .order('order_index', { ascending: true })
           .limit(1)
           .single();
@@ -82,7 +88,7 @@ export const DynamicImage: React.FC<DynamicImageProps> = ({
     };
 
     loadImage();
-  }, [section]);
+  }, [section, stagingMode]);
 
   if (loading) {
     return (

@@ -4,13 +4,19 @@ import { Button } from '../Button';
 import { DynamicImage } from '../DynamicImage';
 import { DONATION_URL } from '../../constants/donation';
 import { useSectionLayout } from '../../hooks/useSectionLayout';
+import { useSectionContent } from '../../hooks/useSectionContent';
 import { useEventTracking } from '../../hooks/useAnalytics';
 import SunLogoText from '../../assets/sunLogowText.svg';
 import './HeroSection.css';
 
 export const HeroSection: React.FC = () => {
   const { layout } = useSectionLayout('hero');
+  const { content } = useSectionContent('hero');
   const { trackDonationClick } = useEventTracking();
+
+  // Get content with fallbacks
+  const title = content.title || 'Giving <span class="hero__title-accent">Hope</span>, Creating Impact';
+  const description = content.description || 'Be a part of something great. We are utterly dedicated to giving hope to those in need, creating a lasting impact for children and families in Washington County, Oklahoma.';
 
   // Layout 1: Default - Text Left, Image Right
   if (layout === 'default' || layout === 'layout-1') {
@@ -37,17 +43,15 @@ export const HeroSection: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
-              >
-                Giving <span className="hero__title-accent">Hope</span>, Creating Impact
-              </motion.h1>
+                dangerouslySetInnerHTML={{ __html: title }}
+              />
               <motion.p
                 className="hero__description"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.5 }}
               >
-                Be a part of something great. We are utterly dedicated to giving hope to those in need, 
-                creating a lasting impact for children and families in Washington County, Oklahoma.
+                {description}
               </motion.p>
               <motion.div
                 className="hero__actions"
@@ -126,17 +130,15 @@ export const HeroSection: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              Giving <span className="hero__title-accent">Hope</span>, Creating Impact
-            </motion.h1>
+              dangerouslySetInnerHTML={{ __html: title }}
+            />
             <motion.p
               className="hero__description"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              Be a part of something great. We are utterly dedicated to giving hope to those in need, 
-              creating a lasting impact for children and families in Washington County, Oklahoma.
+              {description}
             </motion.p>
             <motion.div
               className="hero__actions"
@@ -208,17 +210,15 @@ export const HeroSection: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.6 }}
-              >
-                Giving <span className="hero__title-accent">Hope</span>, Creating Impact
-              </motion.h1>
+                dangerouslySetInnerHTML={{ __html: title }}
+              />
               <motion.p
                 className="hero__description"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.8 }}
               >
-                Be a part of something great. We are utterly dedicated to giving hope to those in need, 
-                creating a lasting impact for children and families in Washington County, Oklahoma.
+                {description}
               </motion.p>
               <motion.div
                 className="hero__actions"

@@ -239,6 +239,48 @@
   }
 }
 
+/* Layout 2: Stats Row with Story Side-by-Side */
+.impact--layout-2 .impact__layout-2-content {
+  display: grid;
+  grid-template-columns: 60% 40%;
+  gap: 3rem;
+  align-items: start;
+}
+
+.impact--layout-2 .impact__layout-2-stats .impact__stats {
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 0;
+}
+
+.impact--layout-2 .impact__layout-2-story .impact__story {
+  margin: 0;
+  position: sticky;
+  top: 2rem;
+}
+
+/* Layout 3: Story First, Stats Below */
+.impact--layout-3 .impact__story {
+  margin-bottom: 5rem;
+}
+
+.impact--layout-3 .impact__stats {
+  margin-bottom: 0;
+}
+
+@media (max-width: 1024px) {
+  .impact--layout-2 .impact__layout-2-content {
+    grid-template-columns: 1fr;
+  }
+
+  .impact--layout-2 .impact__layout-2-stats .impact__stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .impact--layout-2 .impact__layout-2-story .impact__story {
+    position: static;
+  }
+}
+
 @media (max-width: 768px) {
   .impact {
     padding: 5rem 1.5rem;
@@ -267,5 +309,13 @@
 
   .impact__story-text {
     font-size: clamp(1rem, 1.2vw, 1.125rem);
+  }
+
+  .impact--layout-2 .impact__layout-2-stats .impact__stats {
+    grid-template-columns: 1fr;
+  }
+
+  .impact--layout-3 .impact__story {
+    margin-bottom: 4rem;
   }
 }
