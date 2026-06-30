@@ -54,14 +54,11 @@ export const AdminLogin: React.FC = () => {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-      console.log('🔐 Attempting login...', { email, supabaseUrl: supabaseUrl ? 'Set' : 'Missing', hasKey: !!supabaseKey });
-
       if (!supabaseUrl || !supabaseKey || supabaseKey === 'dummy-key-for-initialization' || supabaseKey === 'REPLACE_WITH_YOUR_ANON_PUBLIC_KEY_HERE') {
         setError('Supabase is not configured. Please check your .env file and ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set correctly. See GET_ANON_KEY_STEPS.md for instructions on how to get your anon/public key.');
         console.error('❌ Supabase configuration missing:', {
           hasUrl: !!supabaseUrl,
           hasKey: !!supabaseKey,
-          keyValue: supabaseKey ? (supabaseKey.substring(0, 20) + '...') : 'missing'
         });
         setLoading(false);
         return;
@@ -91,18 +88,16 @@ export const AdminLogin: React.FC = () => {
         }
         setLoading(false);
       } else if (data.user) {
-        console.log('✅ Login successful!', { userId: data.user.id, email: data.user.email });
         // Check if user needs to change password
         const mustChangePassword = data.user.user_metadata?.must_change_password;
         if (mustChangePassword) {
-          // Store that we need to change password
+          // Force a password reset before granting dashboard access
           localStorage.setItem('must_change_password', 'true');
           navigate('/admin/change-password');
         } else {
-          // Store session info (Supabase handles this automatically, but we can store additional info)
-          if (data.session) {
-            localStorage.setItem('supabase.auth.token', JSON.stringify(data.session));
-          }
+          // Supabase persists the session itself (persistSession: true).
+          // Do not duplicate access/refresh tokens into a separate
+          // localStorage key — it would survive sign-out and leak the session.
           navigate('/admin/dashboard');
         }
       } else {

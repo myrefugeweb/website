@@ -1,6 +1,6 @@
 .mission {
   padding: 6rem 2rem;
-  background: #FFFFFF;
+  background: var(--color-white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,7 +14,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 125, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--color-secondary-rgb), 0.2), transparent);
 }
 
 .mission__container {
@@ -37,40 +37,40 @@
   object-fit: cover;
   border-radius: 1.5rem;
   box-shadow: 
-    0 20px 40px -12px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+    0 20px 40px -12px rgba(var(--color-black-rgb), 0.15),
+    0 0 0 1px rgba(var(--color-black-rgb), 0.05);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mission__image:hover img {
   transform: translateY(-8px) scale(1.01);
   box-shadow: 
-    0 30px 60px -12px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+    0 30px 60px -12px rgba(var(--color-black-rgb), 0.2),
+    0 0 0 1px rgba(var(--color-black-rgb), 0.05);
 }
 
 .image-placeholder {
   width: 100%;
   aspect-ratio: 4/3;
-  background: linear-gradient(135deg, #F0F0F0 0%, #E8E8E8 50%, #F5F5F5 100%);
+  background: linear-gradient(135deg, var(--color-gray-200) 0%, var(--color-gray-200) 50%, var(--color-gray-100) 100%);
   border-radius: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9E9E9E;
+  color: var(--color-text-secondary);
   font-size: 1rem;
   font-weight: 500;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
-    0 20px 40px -12px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+    0 20px 40px -12px rgba(var(--color-black-rgb), 0.1),
+    0 0 0 1px rgba(var(--color-black-rgb), 0.05);
 }
 
 .mission__image:hover .image-placeholder {
   transform: translateY(-8px) scale(1.01);
   box-shadow: 
-    0 30px 60px -12px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+    0 30px 60px -12px rgba(var(--color-black-rgb), 0.15),
+    0 0 0 1px rgba(var(--color-black-rgb), 0.05);
 }
 
 .mission__content {
@@ -80,7 +80,7 @@
 .mission__title {
   font-size: clamp(2.5rem, 4vw, 3.5rem);
   font-weight: 800;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin-bottom: 2rem;
   letter-spacing: -0.02em;
   line-height: 1.2;
@@ -89,7 +89,7 @@
 .mission__text {
   font-size: clamp(1.125rem, 1.3vw, 1.25rem);
   line-height: 1.8;
-  color: #4a4a4a;
+  color: var(--color-gray-800);
   margin-bottom: 2rem;
   font-weight: 400;
   letter-spacing: -0.01em;
@@ -98,13 +98,13 @@
 .mission__accent {
   width: 100px;
   height: 5px;
-  background: linear-gradient(90deg, #4CAF50 0%, #66BB6A 50%, #81C784 100%);
+  background: linear-gradient(90deg, var(--color-success) 0%, var(--color-success-light) 50%, var(--color-success-light) 100%);
   border-radius: 3px;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   max-width: 100%;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 2px 8px rgba(var(--color-success-rgb), 0.3);
 }
 
 .mission__accent::after {
@@ -114,7 +114,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--color-white-rgb), 0.6), transparent);
   animation: shimmer-accent 3s infinite;
 }
 
@@ -143,33 +143,55 @@
   }
 }
 
-/* Layout 2: Text Left, Image Right */
-.mission--layout-2 .mission__container {
-  grid-template-columns: 1fr 1fr;
+/* Layout 2: Feature Panel — image leads, copy sits on a branded card */
+.mission--layout-2 {
+  background: linear-gradient(180deg, var(--color-gray-50) 0%, var(--color-white) 100%);
 }
 
-.mission--layout-2 .mission__content {
-  order: 1;
+.mission--layout-2 .mission__container {
+  grid-template-columns: 1.3fr 1fr;
+  gap: 3.5rem;
 }
 
 .mission--layout-2 .mission__image {
-  order: 2;
+  order: 1;
 }
 
-/* Layout 3: Centered Text with Image Below */
+.mission--layout-2 .mission__image img,
+.mission--layout-2 .mission__image .image-placeholder {
+  aspect-ratio: 3/4;
+}
+
+.mission--layout-2 .mission__content {
+  order: 2;
+  padding: 2.75rem;
+  background: var(--color-white);
+  border: 1px solid var(--color-border-subtle);
+  border-left: 5px solid var(--color-success);
+  border-radius: 1.25rem;
+  box-shadow: 0 24px 60px -28px rgba(var(--color-black-rgb), 0.25);
+}
+
+/* Layout 3: Spotlight — centered narrative with a cinematic full-width image */
+.mission--layout-3 {
+  background: radial-gradient(120% 80% at 50% 0%, var(--color-gray-50) 0%, var(--color-white) 60%);
+}
+
 .mission--layout-3 .mission__container {
   grid-template-columns: 1fr;
-  gap: 4rem;
+  gap: 3rem;
+  justify-items: center;
 }
 
 .mission--layout-3 .mission__content--centered {
   text-align: center;
-  max-width: 800px;
+  max-width: 760px;
   margin: 0 auto;
 }
 
 .mission--layout-3 .mission__title--centered {
   text-align: center;
+  font-size: clamp(2.75rem, 5vw, 4rem);
 }
 
 .mission--layout-3 .mission__text--centered {
@@ -181,11 +203,13 @@
 }
 
 .mission--layout-3 .mission__image--full-width {
-  max-width: 100%;
+  width: 100%;
+  max-width: 1100px;
 }
 
-.mission--layout-3 .mission__image--full-width img {
-  aspect-ratio: 16/9;
+.mission--layout-3 .mission__image--full-width img,
+.mission--layout-3 .mission__image--full-width .image-placeholder {
+  aspect-ratio: 21/9;
 }
 
 @media (max-width: 1024px) {

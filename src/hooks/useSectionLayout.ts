@@ -11,6 +11,21 @@ export const useSectionLayout = (section: string, stagingModeOverride?: boolean)
 
   useEffect(() => {
     loadLayout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [section, stagingMode]);
+
+  // Refresh immediately when a layout change is published/staged elsewhere,
+  // so the preview updates without a full page reload.
+  useEffect(() => {
+    const handleLayoutUpdate = (event: Event) => {
+      const detail = (event as CustomEvent).detail as { section?: string } | undefined;
+      if (!detail?.section || detail.section === section) {
+        loadLayout();
+      }
+    };
+    window.addEventListener('layout-updated', handleLayoutUpdate as EventListener);
+    return () => window.removeEventListener('layout-updated', handleLayoutUpdate as EventListener);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section, stagingMode]);
 
   const loadLayout = async () => {

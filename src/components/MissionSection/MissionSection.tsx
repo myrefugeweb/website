@@ -100,19 +100,9 @@ export const MissionSection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="mission__title mission__title--centered">Our Mission</h2>
-            <p className="mission__text mission__text--centered">
-              We believe every child deserves to know their worth, every family deserves support 
-              during difficult times, and every community member deserves the opportunity to make 
-              a difference. Through Christian faith-based mentoring, education, and unconditional 
-              love, we provide local youth with a sense of personal worth, clear direction, and 
-              the knowledge that they matter.
-            </p>
-            <p className="mission__text mission__text--centered">
-              Our mission extends beyond providing services—we're building relationships, restoring 
-              dignity, and creating lasting change that transforms not just individual lives, but 
-              entire communities.
-            </p>
+            <h2 className="mission__title mission__title--centered">{title}</h2>
+            <p className="mission__text mission__text--centered">{text1}</p>
+            <p className="mission__text mission__text--centered">{text2}</p>
             <motion.div 
               className="mission__accent mission__accent--centered"
               initial={{ width: 0 }}

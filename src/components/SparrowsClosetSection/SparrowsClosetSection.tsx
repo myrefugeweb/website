@@ -4,10 +4,16 @@ import { Link } from 'react-router-dom';
 import { Button } from '../Button';
 import { DynamicImage } from '../DynamicImage';
 import { useSectionLayout } from '../../hooks/useSectionLayout';
+import { useSectionContent } from '../../hooks/useSectionContent';
 import './SparrowsClosetSection.css';
 
 export const SparrowsClosetSection: React.FC = () => {
   const { layout } = useSectionLayout('sparrows-closet');
+  const { content } = useSectionContent('sparrows-closet');
+
+  const title = content.title || 'Sparrows Closet';
+  const text = content.text || 'Providing free clothing and hygiene items to families in need.';
+  const cta = content.cta || 'Learn How to Help';
 
   // Layout 1: Image Left, Text Right (Default)
   if (layout === 'default' || layout === 'layout-1') {
@@ -30,13 +36,11 @@ export const SparrowsClosetSection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="sparrows-closet__title">Sparrows Closet</h2>
-            <p className="sparrows-closet__text">
-              Providing free clothing and hygiene items to families in need.
-            </p>
+            <h2 className="sparrows-closet__title">{title}</h2>
+            <p className="sparrows-closet__text">{text}</p>
             <Link to="/sparrows-closet">
               <Button variant="primary" size="lg" className="sparrows-closet__button">
-                Learn How to Help
+                {cta}
               </Button>
             </Link>
           </motion.div>
@@ -57,13 +61,11 @@ export const SparrowsClosetSection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="sparrows-closet__title">Sparrows Closet</h2>
-            <p className="sparrows-closet__text">
-              Providing free clothing and hygiene items to families in need.
-            </p>
+            <h2 className="sparrows-closet__title">{title}</h2>
+            <p className="sparrows-closet__text">{text}</p>
             <Link to="/sparrows-closet">
               <Button variant="primary" size="lg" className="sparrows-closet__button">
-                Learn How to Help
+                {cta}
               </Button>
             </Link>
           </motion.div>
@@ -97,13 +99,11 @@ export const SparrowsClosetSection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="sparrows-closet__title sparrows-closet__title--centered">Sparrows Closet</h2>
-            <p className="sparrows-closet__text sparrows-closet__text--centered">
-              Providing free clothing and hygiene items to families in need.
-            </p>
+            <h2 className="sparrows-closet__title sparrows-closet__title--centered">{title}</h2>
+            <p className="sparrows-closet__text sparrows-closet__text--centered">{text}</p>
             <Link to="/sparrows-closet">
               <Button variant="primary" size="lg" className="sparrows-closet__button">
-                Learn How to Help
+                {cta}
               </Button>
             </Link>
           </motion.div>

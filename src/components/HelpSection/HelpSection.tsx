@@ -2,10 +2,15 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { DynamicImage } from '../DynamicImage';
 import { useSectionLayout } from '../../hooks/useSectionLayout';
+import { useSectionContent } from '../../hooks/useSectionContent';
 import './HelpSection.css';
 
 export const HelpSection: React.FC = () => {
   const { layout } = useSectionLayout('help');
+  const { content } = useSectionContent('help');
+
+  const title = content.title || 'How You Can Help';
+  const text = content.text || 'Supporting My Refuge is an investment in the future of youth in Washington County, Oklahoma. Through providing meals, clothing, and crisis aid to struggling families, we create a foundation of hope and support that transforms lives.';
 
   // Layout 1: Text Left, Image Right (Default)
   if (layout === 'default' || layout === 'layout-1') {
@@ -19,12 +24,8 @@ export const HelpSection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="help__title">How You Can Help</h2>
-            <p className="help__text">
-              Supporting My Refuge is an investment in the future of youth in Washington County,
-              Oklahoma. Through providing meals, clothing, and crisis aid to struggling families,
-              we create a foundation of hope and support that transforms lives.
-            </p>
+            <h2 className="help__title">{title}</h2>
+            <p className="help__text">{text}</p>
           </motion.div>
           <motion.div
             className="help__image"
@@ -61,12 +62,8 @@ export const HelpSection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="help__title">How You Can Help</h2>
-            <p className="help__text">
-              Supporting My Refuge is an investment in the future of youth in Washington County,
-              Oklahoma. Through providing meals, clothing, and crisis aid to struggling families,
-              we create a foundation of hope and support that transforms lives.
-            </p>
+            <h2 className="help__title">{title}</h2>
+            <p className="help__text">{text}</p>
           </motion.div>
         </div>
       </section>
@@ -85,12 +82,8 @@ export const HelpSection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="help__title help__title--centered">How You Can Help</h2>
-            <p className="help__text help__text--centered">
-              Supporting My Refuge is an investment in the future of youth in Washington County,
-              Oklahoma. Through providing meals, clothing, and crisis aid to struggling families,
-              we create a foundation of hope and support that transforms lives.
-            </p>
+            <h2 className="help__title help__title--centered">{title}</h2>
+            <p className="help__text help__text--centered">{text}</p>
           </motion.div>
           <motion.div
             className="help__image help__image--full-width"

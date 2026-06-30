@@ -1,12 +1,12 @@
 .hero {
   min-height: 90vh;
-  background: #FFFFFF;
+  background: var(--color-white);
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 8rem 2rem 4rem;
-  color: #333333;
+  color: var(--color-gray-900);
   overflow: hidden;
 }
 
@@ -59,11 +59,11 @@
   line-height: 1.2;
   margin-bottom: 0;
   letter-spacing: -0.02em;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
 }
 
 .hero__title-accent {
-  color: #FF8C00;
+  color: var(--color-primary-700);
   position: relative;
 }
 
@@ -71,7 +71,7 @@
   font-size: clamp(1rem, 1.3vw, 1.25rem);
   line-height: 1.8;
   margin-bottom: 0;
-  color: #666666;
+  color: var(--color-text-secondary);
   font-weight: 400;
   max-width: 90%;
 }
@@ -93,26 +93,26 @@
 }
 
 .hero__donate-btn {
-  background: #FF8C00;
-  color: #FFFFFF;
+  background: var(--color-primary-500);
+  color: var(--color-on-primary);
   border: none;
 }
 
 .hero__donate-btn:hover {
-  background: #e67e00;
+  background: var(--color-primary-400);
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(255, 140, 0, 0.25);
+  box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.25);
 }
 
 .hero__learn-btn {
   background: transparent;
-  color: #007DFF;
-  border: 2px solid #007DFF;
+  color: var(--color-link);
+  border: 2px solid var(--color-link);
 }
 
 .hero__learn-btn:hover {
-  background: #007DFF;
-  color: #FFFFFF;
+  background: var(--color-secondary-700);
+  color: var(--color-on-secondary);
   transform: translateY(-1px);
 }
 
@@ -138,7 +138,7 @@
 
 .hero__image-wrapper:hover {
   transform: translateY(-5px);
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 25px 80px rgba(var(--color-black-rgb), 0.2);
 }
 
 .hero__image-overlay {
@@ -191,7 +191,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #FFFFFF;
+  color: var(--color-white);
   overflow: hidden;
 }
 
@@ -216,7 +216,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.4) 100%);
+  background: linear-gradient(135deg, rgba(var(--color-black-rgb), 0.6) 0%, rgba(var(--color-black-rgb), 0.4) 100%);
 }
 
 .hero--layout-2 .hero__container {
@@ -231,24 +231,24 @@
 }
 
 .hero--layout-2 .hero__title {
-  color: #FFFFFF;
+  color: var(--color-white);
   margin-bottom: 1.5rem;
 }
 
 .hero--layout-2 .hero__description {
-  color: rgba(255, 255, 255, 0.95);
+  color: rgba(var(--color-white-rgb), 0.95);
   margin-bottom: 2rem;
 }
 
 .hero--layout-2 .hero__learn-btn {
-  background: rgba(255, 255, 255, 0.1);
-  color: #FFFFFF;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(var(--color-white-rgb), 0.1);
+  color: var(--color-white);
+  border: 2px solid rgba(var(--color-white-rgb), 0.3);
 }
 
 .hero--layout-2 .hero__learn-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(var(--color-white-rgb), 0.2);
+  border-color: rgba(var(--color-white-rgb), 0.5);
 }
 
 /* Layout 3: Image Left, Text Right */

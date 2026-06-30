@@ -7,7 +7,7 @@
 .privacy-page__main {
   flex: 1;
   padding: 4rem 2rem;
-  background: linear-gradient(180deg, #F8F9FA 0%, #FFFFFF 100%);
+  background: linear-gradient(180deg, var(--color-gray-50) 0%, var(--color-white) 100%);
 }
 
 .privacy-page__container {
@@ -22,13 +22,13 @@
 .privacy-page__title {
   font-size: 2.5rem;
   font-weight: 800;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin-bottom: 0.5rem;
   letter-spacing: -0.02em;
 }
 
 .privacy-page__last-updated {
-  color: #757575;
+  color: var(--color-text-secondary);
   font-size: 0.9375rem;
   margin-bottom: 2rem;
 }
@@ -44,7 +44,7 @@
 .privacy-page__section h2 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin-bottom: 1rem;
   margin-top: 2rem;
   letter-spacing: -0.01em;
@@ -57,13 +57,13 @@
 .privacy-page__section h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #424242;
+  color: var(--color-gray-800);
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
 }
 
 .privacy-page__section p {
-  color: #424242;
+  color: var(--color-gray-800);
   line-height: 1.75;
   margin-bottom: 1rem;
   font-size: 1rem;
@@ -72,7 +72,7 @@
 .privacy-page__section ul {
   margin: 1rem 0;
   padding-left: 1.5rem;
-  color: #424242;
+  color: var(--color-gray-800);
   line-height: 1.75;
 }
 
@@ -82,22 +82,22 @@
 
 .privacy-page__section strong {
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
 }
 
 .privacy-page__section a {
-  color: #007DFF;
+  color: var(--color-link);
   text-decoration: none;
   transition: color 0.2s;
 }
 
 .privacy-page__section a:hover {
-  color: #0066CC;
+  color: var(--color-secondary-600);
   text-decoration: underline;
 }
 
 .privacy-page__contact {
-  background: #F5F5F5;
+  background: var(--color-gray-100);
   padding: 1.5rem;
   border-radius: 0.5rem;
   margin-top: 1rem;
@@ -108,7 +108,7 @@
 }
 
 .privacy-page__contact a {
-  color: #007DFF;
+  color: var(--color-link);
   text-decoration: none;
 }
 
@@ -119,11 +119,11 @@
 .privacy-page__back {
   margin-top: 3rem;
   padding-top: 2rem;
-  border-top: 1px solid #E8E8E8;
+  border-top: 1px solid var(--color-gray-200);
 }
 
 .privacy-page__back-link {
-  color: #007DFF;
+  color: var(--color-link);
   text-decoration: none;
   font-weight: 600;
   font-size: 1rem;
@@ -132,7 +132,7 @@
 }
 
 .privacy-page__back-link:hover {
-  color: #0066CC;
+  color: var(--color-secondary-600);
 }
 
 @media (max-width: 768px) {

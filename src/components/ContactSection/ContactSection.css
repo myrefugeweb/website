@@ -1,6 +1,6 @@
 .contact {
   padding: 8rem 2rem;
-  background: linear-gradient(180deg, #F8F9FA 0%, #FFFFFF 100%);
+  background: linear-gradient(180deg, var(--color-gray-50) 0%, var(--color-white) 100%);
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -15,7 +15,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 125, 255, 0.15), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--color-secondary-rgb), 0.15), transparent);
 }
 
 .contact__container {
@@ -34,7 +34,7 @@
 .contact__title {
   font-size: clamp(2.5rem, 4vw, 3.5rem);
   font-weight: 800;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin-bottom: 1.5rem;
   letter-spacing: -0.02em;
   line-height: 1.2;
@@ -43,7 +43,7 @@
 .contact__text {
   font-size: clamp(1.125rem, 1.3vw, 1.25rem);
   line-height: 1.8;
-  color: #4a4a4a;
+  color: var(--color-gray-800);
   font-weight: 400;
   letter-spacing: -0.01em;
 }
@@ -59,40 +59,40 @@
   object-fit: cover;
   border-radius: 1.5rem;
   box-shadow: 
-    0 20px 40px -12px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+    0 20px 40px -12px rgba(var(--color-black-rgb), 0.15),
+    0 0 0 1px rgba(var(--color-black-rgb), 0.05);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .contact__image:hover img {
   transform: translateY(-8px) scale(1.01);
   box-shadow: 
-    0 30px 60px -12px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+    0 30px 60px -12px rgba(var(--color-black-rgb), 0.2),
+    0 0 0 1px rgba(var(--color-black-rgb), 0.05);
 }
 
 .contact__image .image-placeholder {
   width: 100%;
   aspect-ratio: 4/3;
-  background: linear-gradient(135deg, #F0F0F0 0%, #E8E8E8 50%, #F5F5F5 100%);
+  background: linear-gradient(135deg, var(--color-gray-200) 0%, var(--color-gray-200) 50%, var(--color-gray-100) 100%);
   border-radius: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9E9E9E;
+  color: var(--color-text-secondary);
   font-size: 1rem;
   font-weight: 500;
   box-shadow: 
-    0 20px 40px -12px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+    0 20px 40px -12px rgba(var(--color-black-rgb), 0.1),
+    0 0 0 1px rgba(var(--color-black-rgb), 0.05);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .contact__image:hover .image-placeholder {
   transform: translateY(-8px) scale(1.01);
   box-shadow: 
-    0 30px 60px -12px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+    0 30px 60px -12px rgba(var(--color-black-rgb), 0.15),
+    0 0 0 1px rgba(var(--color-black-rgb), 0.05);
 }
 
 @media (max-width: 1024px) {
@@ -111,33 +111,47 @@
   }
 }
 
-/* Layout 2: Image Left, Text Right */
+/* Layout 2: Feature Panel — image leads, copy sits on a branded card */
 .contact--layout-2 .contact__container {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 4rem;
 }
 
 .contact--layout-2 .contact__image {
   order: 1;
 }
 
-.contact--layout-2 .contact__content {
-  order: 2;
+.contact--layout-2 .contact__image img,
+.contact--layout-2 .contact__image .image-placeholder {
+  aspect-ratio: 3/4;
 }
 
-/* Layout 3: Centered Text with Image Below */
+.contact--layout-2 .contact__content {
+  order: 2;
+  padding: 2.75rem;
+  background: var(--color-white);
+  border: 1px solid var(--color-border-subtle);
+  border-left: 5px solid var(--color-secondary-500);
+  border-radius: 1.25rem;
+  box-shadow: 0 24px 60px -28px rgba(var(--color-black-rgb), 0.25);
+}
+
+/* Layout 3: Spotlight — centered copy with a cinematic full-width image */
 .contact--layout-3 .contact__container {
   grid-template-columns: 1fr;
-  gap: 4rem;
+  gap: 3rem;
+  justify-items: center;
 }
 
 .contact--layout-3 .contact__content--centered {
   text-align: center;
-  max-width: 800px;
+  max-width: 760px;
   margin: 0 auto;
 }
 
 .contact--layout-3 .contact__title--centered {
   text-align: center;
+  font-size: clamp(2.75rem, 5vw, 4rem);
 }
 
 .contact--layout-3 .contact__text--centered {
@@ -145,11 +159,13 @@
 }
 
 .contact--layout-3 .contact__image--full-width {
-  max-width: 100%;
+  width: 100%;
+  max-width: 1100px;
 }
 
-.contact--layout-3 .contact__image--full-width img {
-  aspect-ratio: 16/9;
+.contact--layout-3 .contact__image--full-width img,
+.contact--layout-3 .contact__image--full-width .image-placeholder {
+  aspect-ratio: 21/9;
 }
 
 @media (max-width: 1024px) {

@@ -2,40 +2,56 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../Card';
 import { useSectionLayout } from '../../hooks/useSectionLayout';
+import { useSectionContent } from '../../hooks/useSectionContent';
 import './ImpactSection.css';
 
 export const ImpactSection: React.FC = () => {
   const { layout } = useSectionLayout('impact');
-  const impactStats = [
+  const { content } = useSectionContent('impact');
+
+  const title = content.title || 'Your Impact';
+  const subtitle = content.subtitle || "Together, we're building a community where every child has a place to belong, where families find hope, and where love transforms lives.";
+  const storyTitle = content['story-title'] || 'Real Stories, Real Impact';
+  const storyText1 = content['story-text-1'] || 'Every number represents a real child, a real family, a real story of transformation. From providing warm meals to families struggling to make ends meet, to offering clothing and essentials through Sparrows Closet, to being a safe haven for youth seeking guidance—your support creates ripples of hope throughout Washington County.';
+  const storyText2 = content['story-text-2'] || "We're not just providing services—we're building relationships, restoring dignity, and creating a community where everyone belongs.";
+
+  const statFallbacks = [
     { 
       value: '10K+', 
       label: 'Meals Delivered', 
       description: 'Nutritious meals provided to children and families in need',
       icon: '🍽️',
-      color: '#FF8C00'
+      color: 'var(--color-primary-600)'
     },
     { 
       value: '100s', 
       label: 'Children Helped', 
       description: 'Lives transformed through mentoring, support, and care',
       icon: '👶',
-      color: '#4CAF50'
+      color: 'var(--color-success)'
     },
     { 
       value: '20+', 
       label: 'Dedicated Volunteers', 
       description: 'Community members giving their time and hearts',
       icon: '❤️',
-      color: '#007DFF'
+      color: 'var(--color-secondary-600)'
     },
     { 
       value: '50+', 
       label: 'Families Served', 
       description: 'Families receiving support and resources through our programs',
       icon: '🏠',
-      color: '#9C27B0'
+      color: 'var(--color-gradient-purple-b)'
     },
   ];
+
+  const impactStats = statFallbacks.map((stat, index) => ({
+    ...stat,
+    value: content[`stat-value-${index}`] || stat.value,
+    label: content[`stat-label-${index}`] || stat.label,
+    description: content[`stat-description-${index}`] || stat.description,
+  }));
 
   const renderStats = () => (
     <div className="impact__stats">
@@ -76,17 +92,9 @@ export const ImpactSection: React.FC = () => {
       transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="impact__story-content">
-        <h3 className="impact__story-title">Real Stories, Real Impact</h3>
-        <p className="impact__story-text">
-          Every number represents a real child, a real family, a real story of transformation. 
-          From providing warm meals to families struggling to make ends meet, to offering 
-          clothing and essentials through Sparrows Closet, to being a safe haven for youth 
-          seeking guidance—your support creates ripples of hope throughout Washington County.
-        </p>
-        <p className="impact__story-text">
-          We're not just providing services—we're building relationships, restoring dignity, 
-          and creating a community where everyone belongs.
-        </p>
+        <h3 className="impact__story-title">{storyTitle}</h3>
+        <p className="impact__story-text">{storyText1}</p>
+        <p className="impact__story-text">{storyText2}</p>
       </div>
     </motion.div>
   );
@@ -104,11 +112,8 @@ export const ImpactSection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="impact__title">Your Impact</h2>
-            <p className="impact__subtitle">
-              Together, we're building a community where every child has a place to belong, 
-              where families find hope, and where love transforms lives.
-            </p>
+            <h2 className="impact__title">{title}</h2>
+            <p className="impact__subtitle">{subtitle}</p>
           </motion.div>
           {renderStats()}
           {renderStory()}
@@ -130,11 +135,8 @@ export const ImpactSection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="impact__title">Your Impact</h2>
-            <p className="impact__subtitle">
-              Together, we're building a community where every child has a place to belong, 
-              where families find hope, and where love transforms lives.
-            </p>
+            <h2 className="impact__title">{title}</h2>
+            <p className="impact__subtitle">{subtitle}</p>
           </motion.div>
           <div className="impact__layout-2-content">
             <div className="impact__layout-2-stats">
@@ -162,11 +164,8 @@ export const ImpactSection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="impact__title">Your Impact</h2>
-            <p className="impact__subtitle">
-              Together, we're building a community where every child has a place to belong, 
-              where families find hope, and where love transforms lives.
-            </p>
+            <h2 className="impact__title">{title}</h2>
+            <p className="impact__subtitle">{subtitle}</p>
           </motion.div>
           {renderStory()}
           {renderStats()}

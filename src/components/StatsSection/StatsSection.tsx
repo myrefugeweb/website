@@ -1,9 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useSectionContent } from '../../hooks/useSectionContent';
 import './StatsSection.css';
 
 export const StatsSection: React.FC = () => {
-  const stats = [
+  const { content } = useSectionContent('stats');
+
+  const statFallbacks = [
     {
       value: '20+',
       label: 'Dedicated Volunteers',
@@ -20,6 +23,12 @@ export const StatsSection: React.FC = () => {
       icon: '❤️'
     }
   ];
+
+  const stats = statFallbacks.map((stat, index) => ({
+    ...stat,
+    value: content[`stat-value-${index + 1}`] || stat.value,
+    label: content[`stat-label-${index + 1}`] || stat.label,
+  }));
 
   return (
     <section className="stats-section">

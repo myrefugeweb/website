@@ -1,6 +1,6 @@
 .stats-section {
   padding: 4rem 2rem;
-  background: #FFFFFF;
+  background: var(--color-white);
   position: relative;
   z-index: 2;
 }
@@ -31,7 +31,7 @@
 .stats-section__value {
   font-size: clamp(2rem, 4vw, 3.5rem);
   font-weight: 800;
-  color: #FF8C00;
+  color: var(--color-primary-700);
   line-height: 1.2;
   margin-bottom: 0.5rem;
   letter-spacing: -0.02em;
@@ -39,7 +39,7 @@
 
 .stats-section__label {
   font-size: 1rem;
-  color: #333333;
+  color: var(--color-gray-900);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -52,7 +52,7 @@
   transform: translateY(-50%);
   width: 1px;
   height: 60px;
-  background: linear-gradient(to bottom, transparent, #E0E0E0, transparent);
+  background: linear-gradient(to bottom, transparent, var(--color-gray-300), transparent);
 }
 
 .stats-section__stat:last-child .stats-section__divider {
@@ -77,7 +77,7 @@
     transform: translateX(-50%);
     width: 60px;
     height: 1px;
-    background: linear-gradient(to right, transparent, #E0E0E0, transparent);
+    background: linear-gradient(to right, transparent, var(--color-gray-300), transparent);
   }
 }
 
@@ -103,7 +103,7 @@
     transform: translateX(-50%);
     width: 60px;
     height: 1px;
-    background: linear-gradient(to right, transparent, #E0E0E0, transparent);
+    background: linear-gradient(to right, transparent, var(--color-gray-300), transparent);
   }
 
   .stats-section__stat:last-child::after {

@@ -2,10 +2,15 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { DynamicImage } from '../DynamicImage';
 import { useSectionLayout } from '../../hooks/useSectionLayout';
+import { useSectionContent } from '../../hooks/useSectionContent';
 import './ContactSection.css';
 
 export const ContactSection: React.FC = () => {
   const { layout } = useSectionLayout('contact');
+  const { content } = useSectionContent('contact');
+
+  const title = content.title || 'Looking to get in touch?';
+  const text = content.text || 'Give us a call or send an email.';
 
   // Layout 1: Text Left, Image Right (Default)
   if (layout === 'default' || layout === 'layout-1') {
@@ -19,8 +24,8 @@ export const ContactSection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="contact__title">Looking to get in touch?</h2>
-            <p className="contact__text">Give us a call or send an email.</p>
+            <h2 className="contact__title">{title}</h2>
+            <p className="contact__text">{text}</p>
           </motion.div>
           <motion.div
             className="contact__image"
@@ -57,8 +62,8 @@ export const ContactSection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="contact__title">Looking to get in touch?</h2>
-            <p className="contact__text">Give us a call or send an email.</p>
+            <h2 className="contact__title">{title}</h2>
+            <p className="contact__text">{text}</p>
           </motion.div>
         </div>
       </section>
@@ -77,8 +82,8 @@ export const ContactSection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="contact__title contact__title--centered">Looking to get in touch?</h2>
-            <p className="contact__text contact__text--centered">Give us a call or send an email.</p>
+            <h2 className="contact__title contact__title--centered">{title}</h2>
+            <p className="contact__text contact__text--centered">{text}</p>
           </motion.div>
           <motion.div
             className="contact__image contact__image--full-width"

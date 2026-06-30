@@ -1,6 +1,6 @@
 .calendar-section {
   padding: 6rem 2rem;
-  background: #FFFFFF;
+  background: var(--color-white);
   position: relative;
   scroll-margin-top: 80px;
 }
@@ -12,7 +12,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 125, 255, 0.15), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--color-secondary-rgb), 0.15), transparent);
 }
 
 .calendar-section__container {
@@ -28,7 +28,7 @@
 .calendar-section__title {
   font-size: clamp(2.5rem, 4vw, 3.5rem);
   font-weight: 800;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin-bottom: 1.5rem;
   letter-spacing: -0.02em;
   line-height: 1.2;
@@ -37,7 +37,7 @@
 .calendar-section__subtitle {
   font-size: clamp(1.125rem, 1.3vw, 1.25rem);
   line-height: 1.7;
-  color: #5a5a5a;
+  color: var(--color-text-secondary);
   max-width: 600px;
   margin: 0 auto;
   font-weight: 400;
@@ -54,15 +54,15 @@
   display: flex;
   gap: 1.5rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(var(--color-black-rgb), 0.05);
 }
 
 .calendar-section__event-card:hover {
   transform: translateY(-4px);
   box-shadow: 
-    0 20px 40px -12px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 125, 255, 0.2);
+    0 20px 40px -12px rgba(var(--color-black-rgb), 0.15),
+    0 0 0 1px rgba(var(--color-black-rgb), 0.05);
+  border-color: rgba(var(--color-secondary-rgb), 0.2);
 }
 
 .calendar-section__event-date {
@@ -72,9 +72,9 @@
   justify-content: center;
   min-width: 80px;
   padding: 1rem;
-  background: linear-gradient(135deg, #007DFF 0%, #0066CC 100%);
+  background: linear-gradient(135deg, var(--color-secondary-700) 0%, var(--color-secondary-800) 100%);
   border-radius: 1rem;
-  color: #FFFFFF;
+  color: var(--color-on-secondary);
   text-align: center;
 }
 
@@ -104,7 +104,7 @@
 .calendar-section__event-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0;
   letter-spacing: -0.01em;
   line-height: 1.3;
@@ -113,7 +113,7 @@
 .calendar-section__event-description {
   font-size: 1rem;
   line-height: 1.6;
-  color: #4a4a4a;
+  color: var(--color-gray-800);
   margin: 0;
   flex: 1;
 }
@@ -124,7 +124,7 @@
   gap: 1rem;
   margin-top: 0.5rem;
   font-size: 0.875rem;
-  color: #757575;
+  color: var(--color-text-secondary);
 }
 
 .calendar-section__event-time,
@@ -154,19 +154,19 @@
 
 .calendar-section__loading p {
   font-size: 1.125rem;
-  color: #757575;
+  color: var(--color-text-secondary);
 }
 
 .calendar-section__empty-text {
   font-size: 1.25rem;
-  color: #333333;
+  color: var(--color-gray-900);
   font-weight: 500;
   margin-bottom: 0.5rem;
 }
 
 .calendar-section__empty-hint {
   font-size: 1rem;
-  color: #757575;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 

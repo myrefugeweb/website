@@ -1,16 +1,41 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { HomePage } from './pages/HomePage';
 import { SparrowsClosetPage } from './pages/SparrowsClosetPage';
 import { PrivacyPage } from './pages/PrivacyPage';
-import { AdminLogin } from './pages/AdminLogin';
-import { AdminDashboard } from './pages/AdminDashboard';
-import { ChangePassword } from './pages/ChangePassword';
-import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAnalytics } from './hooks/useAnalytics';
 import { StagingProvider } from './contexts/StagingContext';
-import { OnboardingProvider } from './contexts/OnboardingContext';
 import './styles/global.css';
+
+const AdminLogin = lazy(() =>
+  import('./pages/AdminLogin').then((m) => ({ default: m.AdminLogin }))
+);
+const AdminDashboardPage = lazy(() =>
+  import('./pages/AdminDashboard/AdminDashboardPage').then((m) => ({ default: m.AdminDashboardPage }))
+);
+const AdminHelp = lazy(() =>
+  import('./pages/AdminHelp').then((m) => ({ default: m.AdminHelp }))
+);
+const ChangePassword = lazy(() =>
+  import('./pages/ChangePassword').then((m) => ({ default: m.ChangePassword }))
+);
+const ProtectedRoute = lazy(() =>
+  import('./components/ProtectedRoute').then((m) => ({ default: m.ProtectedRoute }))
+);
+
+const RouteFallback = () => (
+  <div
+    style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '40vh',
+      color: 'var(--color-text-secondary)',
+    }}
+  >
+    Loading…
+  </div>
+);
 
 // Analytics wrapper component
 const AnalyticsWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -53,6 +78,7 @@ function App() {
       <BrowserRouter basename={basePath}>
         <AnalyticsWrapper>
           <RedirectHandler />
+          <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route 
               path="/" 
@@ -91,15 +117,22 @@ function App() {
               path="/admin/dashboard" 
               element={
                 <ProtectedRoute>
-                  <OnboardingProvider>
-                    <AdminDashboard />
-                  </OnboardingProvider>
+                  <AdminDashboardPage />
                 </ProtectedRoute>
               } 
+            />
+            <Route
+              path="/admin/help"
+              element={
+                <ProtectedRoute>
+                  <AdminHelp />
+                </ProtectedRoute>
+              }
             />
             {/* Catch-all route for 404 */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </Suspense>
         </AnalyticsWrapper>
       </BrowserRouter>
     );

@@ -1,0 +1,91 @@
+/*
+ * Design tokens — single source of truth for color in CSS.
+ * Mirrors src/design-system/theme.ts. Keep the two in sync.
+ * Consume via var(--token); never hardcode hex/rgba in component CSS.
+ */
+:root {
+  /* ===== Brand · Primary (orange) ===== */
+  --color-primary-50: #fff4e6;
+  --color-primary-100: #ffe8cc;
+  --color-primary-200: #ffd199;
+  --color-primary-300: #ffba66;
+  --color-primary-400: #ffa333;
+  --color-primary-500: #ff8c00;
+  --color-primary-600: #cc7000;
+  --color-primary-700: #995400;
+  --color-primary-800: #663800;
+  --color-primary-900: #331c00;
+  --color-primary: var(--color-primary-500);
+  --color-primary-rgb: 255, 140, 0;
+
+  /* ===== Brand · Secondary (blue) ===== */
+  --color-secondary-50: #e6f2ff;
+  --color-secondary-100: #cce5ff;
+  --color-secondary-200: #99cbff;
+  --color-secondary-300: #66b1ff;
+  --color-secondary-400: #3397ff;
+  --color-secondary-500: #007dff;
+  --color-secondary-600: #0064cc;
+  --color-secondary-700: #004b99;
+  --color-secondary-800: #003266;
+  --color-secondary-900: #001933;
+  --color-secondary: var(--color-secondary-500);
+  --color-secondary-rgb: 0, 125, 255;
+  --color-secondary-600-rgb: 0, 102, 204;
+
+  /* ===== Neutrals ===== */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-white-rgb: 255, 255, 255;
+  --color-black-rgb: 0, 0, 0;
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #eeeeee;
+  --color-gray-300: #e0e0e0;
+  --color-gray-400: #bdbdbd;
+  --color-gray-500: #9e9e9e;
+  --color-gray-600: #757575;
+  --color-gray-700: #616161;
+  --color-gray-800: #424242;
+  --color-gray-900: #212121;
+
+  /* ===== Semantic · Text (all WCAG AAA ≥7:1 on white/gray-50/gray-100) ===== */
+  --color-text-primary: #1a1a1a;   /* 17.4:1 on white */
+  --color-text-secondary: #525252; /* 7.81:1 on white — AAA muted text */
+  --color-text-tertiary: #525252;  /* aliased to AAA-safe value (was #9e9e9e, failed) */
+  --color-text-inverse: #ffffff;
+
+  /* ===== Semantic · Interactive (AAA) ===== */
+  --color-link: #004b99;           /* 8.51:1 on white — AAA blue links/text */
+  --color-on-primary: #1a1a1a;     /* 7.46:1 on primary-500 — dark text for orange surfaces */
+  --color-on-secondary: #ffffff;   /* use on secondary-700+ surfaces (8.51:1) */
+
+  /* ===== Semantic · Surface & Border ===== */
+  --color-surface: #ffffff;
+  --color-surface-muted: #fafafa;
+  --color-surface-subtle: #f5f5f5;
+  --color-border: #e0e0e0;
+  --color-border-subtle: #eeeeee;
+
+  /* ===== Feedback · Error ===== */
+  --color-error: #dc2626;
+  --color-error-dark: #931818;
+  --color-error-light: #ff6b6b;
+  --color-error-bg: #ffebee;
+  --color-error-rgb: 220, 38, 38;
+  --color-error-dark-rgb: 147, 24, 24;
+  --color-error-light-rgb: 255, 107, 107;
+
+  /* ===== Feedback · Success ===== */
+  --color-success: #4caf50;
+  --color-success-light: #81c784;
+  --color-success-rgb: 76, 175, 80;
+
+  /* ===== Accent ===== */
+  --color-gold: #ffd700;
+  --color-gold-rgb: 255, 215, 0;
+
+  /* ===== Off-brand gradient (flagged for review — not part of brand palette) ===== */
+  --color-gradient-purple-a: #667eea;
+  --color-gradient-purple-b: #764ba2;
+}

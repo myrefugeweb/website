@@ -6,7 +6,7 @@ import { DONATION_URL } from '../../constants/donation';
 import { useSectionLayout } from '../../hooks/useSectionLayout';
 import { useSectionContent } from '../../hooks/useSectionContent';
 import { useEventTracking } from '../../hooks/useAnalytics';
-import SunLogoText from '../../assets/sunLogowText.svg';
+import SunLogoText from '../../assets/sunLogowText.png';
 import './HeroSection.css';
 
 export const HeroSection: React.FC = () => {

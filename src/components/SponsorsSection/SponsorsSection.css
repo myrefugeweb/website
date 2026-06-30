@@ -1,6 +1,6 @@
 .sponsors-section {
   padding: 5rem 2rem;
-  background: #F8F9FA;
+  background: var(--color-gray-50);
   position: relative;
 }
 
@@ -17,14 +17,14 @@
 .sponsors-section__title {
   font-size: clamp(2rem, 4vw, 2.5rem);
   font-weight: 800;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin-bottom: 1rem;
   letter-spacing: -0.02em;
 }
 
 .sponsors-section__subtitle {
   font-size: 1.125rem;
-  color: #666666;
+  color: var(--color-text-secondary);
   max-width: 600px;
   margin: 0 auto;
 }
@@ -41,9 +41,9 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: #FFFFFF;
+  background: var(--color-white);
   border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(var(--color-black-rgb), 0.08);
   transition: all 0.3s ease;
   text-decoration: none;
   min-height: 120px;
@@ -51,7 +51,7 @@
 }
 
 .sponsors-section__sponsor:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(var(--color-black-rgb), 0.12);
 }
 
 .sponsors-section__logo {
@@ -73,7 +73,7 @@
 .sponsors-section__placeholder {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #999999;
+  color: var(--color-text-secondary);
   text-align: center;
 }
 

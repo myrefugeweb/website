@@ -2,12 +2,17 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { DynamicImage } from '../DynamicImage';
 import { useSectionLayout } from '../../hooks/useSectionLayout';
+import { useSectionContent } from '../../hooks/useSectionContent';
 import './StorySection.css';
 
 export const StorySection: React.FC = () => {
   const { layout } = useSectionLayout('story');
+  const { content } = useSectionContent('story');
+
+  const title = content.title || 'Our Story';
+  const subtitle = content.subtitle || 'Every child deserves a place to belong. Every family deserves support. Every community deserves hope.';
   
-  const stories = [
+  const storyFallbacks = [
     {
       title: 'A Place of Hope',
       content: 'Every day, children walk through our doors seeking more than just a meal or clothing. They\'re looking for someone who believes in them, who sees their potential, and who offers a safe space to grow.',
@@ -25,6 +30,12 @@ export const StorySection: React.FC = () => {
     }
   ];
 
+  const stories = storyFallbacks.map((story, index) => ({
+    ...story,
+    title: content[`story-title-${index}`] || story.title,
+    content: content[`story-text-${index}`] || story.content,
+  }));
+
   // Layout 1: Vertical Stack (Default)
   if (layout === 'default' || layout === 'layout-1') {
     return (
@@ -37,11 +48,8 @@ export const StorySection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="story-section__title">Our Story</h2>
-            <p className="story-section__subtitle">
-              Every child deserves a place to belong. Every family deserves support. 
-              Every community deserves hope.
-            </p>
+            <h2 className="story-section__title">{title}</h2>
+            <p className="story-section__subtitle">{subtitle}</p>
           </motion.div>
 
           <div className="story-section__stories">
@@ -85,11 +93,8 @@ export const StorySection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="story-section__title">Our Story</h2>
-            <p className="story-section__subtitle">
-              Every child deserves a place to belong. Every family deserves support. 
-              Every community deserves hope.
-            </p>
+            <h2 className="story-section__title">{title}</h2>
+            <p className="story-section__subtitle">{subtitle}</p>
           </motion.div>
 
           <div className="story-section__stories story-section__stories--grid">
@@ -133,11 +138,8 @@ export const StorySection: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="story-section__title">Our Story</h2>
-            <p className="story-section__subtitle">
-              Every child deserves a place to belong. Every family deserves support. 
-              Every community deserves hope.
-            </p>
+            <h2 className="story-section__title">{title}</h2>
+            <p className="story-section__subtitle">{subtitle}</p>
           </motion.div>
 
           <div className="story-section__stories">

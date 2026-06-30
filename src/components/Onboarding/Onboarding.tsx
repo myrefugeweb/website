@@ -3,199 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 import { useUserRole } from '../../hooks/useUserRole';
 import { Button } from '../Button';
+import { getOnboardingSteps } from '../../data/adminHelpTopics';
+import type { OnboardingStep } from '../../data/adminHelpTopics';
 import './Onboarding.css';
-
-interface OnboardingStep {
-  id: string;
-  title: string;
-  description: string;
-  target?: string; // CSS selector for element to highlight
-  action?: {
-    type: 'click' | 'type' | 'navigate' | 'open-image-library' | 'open-image-library-on-next';
-    selector?: string;
-    value?: string;
-    tab?: string;
-  };
-  position?: 'top' | 'bottom' | 'left' | 'right' | 'center';
-  role?: string[]; // Roles that should see this step
-}
-
-// Role-based onboarding steps
-const getOnboardingSteps = (userRole: string): OnboardingStep[] => {
-  const baseSteps: OnboardingStep[] = [
-    {
-      id: 'welcome',
-      title: 'Welcome to My Refuge Admin Dashboard! 🎉',
-      description: 'Let\'s take a quick tour to help you get started. We\'ll walk through each feature step by step. You can interact with everything freely - the overlay won\'t block you!',
-      position: 'center',
-    },
-  ];
-
-  const editorSteps: OnboardingStep[] = [
-    {
-      id: 'visual-editor-intro',
-      title: 'Visual Editor - Your Content Hub',
-      description: 'The Visual Editor is where you\'ll make all your content changes. This tab is already selected. Let\'s explore the editing features!',
-      target: '[data-tab="visual-editor"]',
-      position: 'bottom',
-      role: ['admin', 'editor', 'super_admin'],
-    },
-    {
-      id: 'edit-mode-toggle',
-      title: 'Enable Edit Mode',
-      description: 'First, toggle Edit Mode ON using the button in the toolbar (you\'ll see it turn orange). When Edit Mode is ON, you can click on any element to edit it. The overlay won\'t block you - you can interact freely!',
-      target: '.visual-editor__toolbar-right .button:last-child',
-      position: 'left',
-      role: ['admin', 'editor', 'super_admin'],
-    },
-    {
-      id: 'edit-text',
-      title: 'Edit Text Content',
-      description: 'With Edit Mode ON, you can click on any text element (headings, paragraphs, titles) to edit it. A modal will open where you can modify the content. Changes are saved to staging automatically. Try clicking on the hero title or description!',
-      target: '.visual-editor__preview',
-      position: 'top',
-      role: ['admin', 'editor', 'super_admin'],
-    },
-    {
-      id: 'edit-image',
-      title: 'Edit Images',
-      description: 'Images work the same way! Click on any image on the page to swap it with another from your library. The edit modal will show all available images for that section. You can select a different image or upload a new one.',
-      target: '.visual-editor__preview',
-      position: 'top',
-      role: ['admin', 'editor', 'super_admin'],
-    },
-    {
-      id: 'image-library-button',
-      title: 'Image Library - Manage All Images',
-      description: 'The "🖼️ Image Library" button opens your full image collection. Click "Next" to open it and explore the features!',
-      target: '.visual-editor__toolbar-right .button:nth-child(2)', // Image Library button
-      action: { 
-        type: 'open-image-library-on-next', 
-        selector: '.visual-editor__toolbar-right .button:nth-child(2)'
-      },
-      position: 'left',
-      role: ['admin', 'editor', 'super_admin'],
-    },
-    {
-      id: 'image-library-cleanup',
-      title: 'Clean Duplicates',
-      description: 'The "🧹 Clean Duplicates" button helps you remove duplicate images from your library. This keeps your library organized and saves storage space.',
-      target: '.image-library__cleanup-button',
-      position: 'bottom',
-      role: ['admin', 'editor', 'super_admin'],
-    },
-    {
-      id: 'image-library-upload',
-      title: 'Upload New Images',
-      description: 'Click the "📤 Upload New" button to add images to your library. You can upload multiple images at once. Once uploaded, they\'ll appear in the grid below.',
-      target: '.image-library__upload-label',
-      position: 'bottom',
-      role: ['admin', 'editor', 'super_admin'],
-    },
-    {
-      id: 'image-library-grid',
-      title: 'Image Grid - Select & Manage',
-      description: 'Click on any image in the grid to select it. Each image shows which sections are using it. Use the "🗑️ Delete" button on any image to remove it from your library.',
-      target: '.image-library__grid',
-      position: 'top',
-      role: ['admin', 'editor', 'super_admin'],
-    },
-    {
-      id: 'image-library-close',
-      title: 'Close Image Library',
-      description: 'You can close the Image Library by clicking the X button or clicking outside the modal. When editing images on the page, the library will open automatically for you to select a new image.',
-      target: '.visual-editor__library-modal .visual-editor__modal-close',
-      action: { type: 'click', selector: '.visual-editor__library-overlay' }, // Click overlay to close
-      position: 'top',
-      role: ['admin', 'editor', 'super_admin'],
-    },
-    {
-      id: 'change-layout',
-      title: 'Change Section Layouts',
-      description: 'Each section has 3 different layout options. When Edit Mode is ON, you\'ll see floating "Layout" buttons on each section. Click one to see the layout previews and choose a different design.',
-      target: '.visual-editor__preview',
-      position: 'top',
-      role: ['admin', 'editor', 'super_admin'],
-    },
-    {
-      id: 'staging-mode',
-      title: 'Staging Mode - Safe Editing',
-      description: 'All your changes are saved in "staging" mode - they won\'t go live until you click "Publish Changes". You\'ll see an "Unpublished" badge when you have pending changes. This lets you preview everything safely before going live!',
-      target: '.visual-editor__toolbar',
-      position: 'bottom',
-      role: ['admin', 'editor', 'super_admin'],
-    },
-  ];
-
-  const adminSteps: OnboardingStep[] = [
-    {
-      id: 'events-tab',
-      title: 'Manage Events',
-      description: 'The Events tab lets you create and manage calendar events that appear on your website. Let\'s explore the Events section!',
-      target: '[data-tab="events"]',
-      action: { type: 'navigate', tab: 'events' },
-      position: 'bottom',
-      role: ['admin', 'super_admin'],
-    },
-    {
-      id: 'create-event',
-      title: 'Creating an Event',
-      description: 'Click the "➕ Add New Event" button to create a new calendar event. You\'ll fill in: event title (required), description, date (required), optional time, and location. Events appear on your website\'s calendar section.',
-      target: '.admin-dashboard__section-header',
-      position: 'bottom',
-      role: ['admin', 'super_admin'],
-    },
-    {
-      id: 'event-form',
-      title: 'Event Form Fields',
-      description: 'When creating an event, you\'ll see fields for: Title (required), Description, Date (required), Time (optional), and Location (optional). Fill in the details and click "Save Event" to add it to your calendar.',
-      target: '.admin-dashboard__form',
-      position: 'top',
-      role: ['admin', 'super_admin'],
-    },
-    {
-      id: 'analytics-tab',
-      title: 'View Analytics',
-      description: 'The Analytics tab shows your website traffic, page views, unique visitors, device types, and browser data. Click the "📊 Analytics" tab to see your site\'s performance metrics!',
-      target: '[data-tab="analytics"]',
-      action: { type: 'navigate', tab: 'analytics' },
-      position: 'bottom',
-      role: ['admin', 'super_admin'],
-    },
-  ];
-
-  const superAdminSteps: OnboardingStep[] = [
-    {
-      id: 'admin-tab',
-      title: 'User & Role Management',
-      description: 'As a super admin, you can manage users, assign roles, and control permissions in the Admin tab. Click the "👑 Admin" tab to access these features!',
-      target: '[data-tab="admin"]',
-      action: { type: 'navigate', tab: 'admin' },
-      position: 'bottom',
-      role: ['super_admin'],
-    },
-  ];
-
-  const finalStep: OnboardingStep[] = [
-    {
-      id: 'complete',
-      title: 'You\'re All Set! 🎊',
-      description: 'You\'ve completed the onboarding tour. Remember: all changes are in staging mode until you publish them. Feel free to explore and experiment!',
-      position: 'center',
-    },
-  ];
-
-  // Filter steps based on user role
-  const allSteps = [
-    ...baseSteps,
-    ...editorSteps.filter(step => !step.role || step.role.includes(userRole) || (userRole === 'admin' && step.role.includes('admin'))),
-    ...adminSteps.filter(step => !step.role || step.role.includes(userRole) || userRole === 'super_admin'),
-    ...superAdminSteps.filter(step => !step.role || step.role.includes(userRole)),
-    ...finalStep,
-  ];
-
-  return allSteps;
-};
 
 export const Onboarding: React.FC = () => {
   let onboardingContext;
@@ -297,7 +107,7 @@ export const Onboarding: React.FC = () => {
       }, 600);
     } else if (step.action?.type === 'open-image-library') {
       // Open the image library modal immediately (for steps that need it open)
-      const selector = step.action.selector || '.visual-editor__toolbar-right .button:nth-child(2)';
+      const selector = step.action.selector || '[data-onboarding="image-library"]';
       const imageLibraryButton = document.querySelector(selector) as HTMLElement;
       if (imageLibraryButton) {
         imageLibraryButton.click();
@@ -339,7 +149,7 @@ export const Onboarding: React.FC = () => {
   const handleNext = () => {
     // If we're on the image-library-button step, open the modal first
     if (step.id === 'image-library-button' && step.action?.type === 'open-image-library-on-next') {
-      const selector = step.action.selector || '.visual-editor__toolbar-right .button:nth-child(2)';
+      const selector = step.action.selector || '[data-onboarding="image-library"]';
       const imageLibraryButton = document.querySelector(selector) as HTMLElement;
       if (imageLibraryButton) {
         imageLibraryButton.click();

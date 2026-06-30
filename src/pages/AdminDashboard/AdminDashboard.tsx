@@ -63,6 +63,8 @@ export const AdminDashboard: React.FC = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    // Clean up any legacy manually-stored session token from older builds.
+    localStorage.removeItem('supabase.auth.token');
     navigate('/admin');
   };
 
@@ -105,17 +107,25 @@ export const AdminDashboard: React.FC = () => {
             <h1 className="admin-dashboard__title">Admin Dashboard</h1>
             <p className="admin-dashboard__subtitle">Welcome back, {user.email}</p>
           </div>
-          <div className="admin-dashboard__profile-container">
+          <div className="admin-dashboard__header-actions">
             <button
-              className="admin-dashboard__profile-button"
-              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-              aria-label="Profile menu"
+              className="admin-dashboard__help-center-button"
+              onClick={() => navigate('/admin/help')}
+              data-onboarding="help-center"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M20.59 22C20.59 18.13 16.74 15 12 15C7.26 15 3.41 18.13 3.41 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              Help Center
             </button>
+            <div className="admin-dashboard__profile-container">
+              <button
+                className="admin-dashboard__profile-button"
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                aria-label="Profile menu"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M20.59 22C20.59 18.13 16.74 15 12 15C7.26 15 3.41 18.13 3.41 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
             {showProfileDropdown && (
               <div className="admin-dashboard__profile-dropdown">
                 <button
@@ -160,6 +170,7 @@ export const AdminDashboard: React.FC = () => {
                 </button>
               </div>
             )}
+            </div>
           </div>
         </div>
       </header>
@@ -169,6 +180,7 @@ export const AdminDashboard: React.FC = () => {
           className={`admin-dashboard__main-tab ${activeMainTab === 'visual-editor' ? 'active' : ''}`}
           onClick={() => setActiveMainTab('visual-editor')}
           data-tab="visual-editor"
+          data-onboarding="tab-visual-editor"
         >
           🎨 Visual Editor
         </button>
@@ -176,6 +188,7 @@ export const AdminDashboard: React.FC = () => {
           className={`admin-dashboard__main-tab ${activeMainTab === 'events' ? 'active' : ''}`}
           onClick={() => setActiveMainTab('events')}
           data-tab="events"
+          data-onboarding="tab-events"
         >
           📅 Events
         </button>
@@ -183,6 +196,7 @@ export const AdminDashboard: React.FC = () => {
           className={`admin-dashboard__main-tab ${activeMainTab === 'analytics' ? 'active' : ''}`}
           onClick={() => setActiveMainTab('analytics')}
           data-tab="analytics"
+          data-onboarding="tab-analytics"
         >
           📊 Analytics
         </button>
@@ -191,6 +205,7 @@ export const AdminDashboard: React.FC = () => {
             className={`admin-dashboard__main-tab ${activeMainTab === 'admin' ? 'active' : ''}`}
             onClick={() => setActiveMainTab('admin')}
             data-tab="admin"
+            data-onboarding="tab-admin"
           >
             👑 Admin
           </button>
@@ -1291,17 +1306,61 @@ const ProfileSettingsModal: React.FC<{ user: any; onClose: () => void }> = ({ us
 };
 
 // Events Tab Component
+type EventFormData = {
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+};
+
+const EMPTY_EVENT_FORM: EventFormData = {
+  title: '',
+  description: '',
+  date: '',
+  time: '',
+  location: '',
+};
+
+const todayISO = () => new Date().toISOString().split('T')[0];
+
+const parseEventDate = (dateString: string) => new Date(`${dateString}T00:00:00`);
+
+const formatEventMonth = (dateString: string) =>
+  parseEventDate(dateString).toLocaleDateString('en-US', { month: 'short' });
+
+const formatEventDay = (dateString: string) =>
+  parseEventDate(dateString).toLocaleDateString('en-US', { day: 'numeric' });
+
+const formatEventFullDate = (dateString: string) =>
+  parseEventDate(dateString).toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
+const formatEventTime = (timeString?: string) => {
+  if (!timeString) return '';
+  const [hours, minutes] = timeString.split(':');
+  const hour = parseInt(hours, 10);
+  if (Number.isNaN(hour)) return '';
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${minutes} ${ampm}`;
+};
+
 const EventsTab: React.FC = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    date: '',
-    time: '',
-    location: '',
-  });
+  const [mode, setMode] = useState<'list' | 'add' | 'edit'>('list');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState<EventFormData>(EMPTY_EVENT_FORM);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [removeConfirmId, setRemoveConfirmId] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     loadEvents();
@@ -1317,148 +1376,317 @@ const EventsTab: React.FC = () => {
 
     if (error) {
       console.error('Error loading events:', error);
+      setActionError('We could not load your events just now. Please refresh the page to try again.');
     } else {
       setEvents(data || []);
     }
     setLoading(false);
   };
 
+  const openAddForm = () => {
+    setFormData(EMPTY_EVENT_FORM);
+    setEditingId(null);
+    setFormError(null);
+    setActionError(null);
+    setRemoveConfirmId(null);
+    setMode('add');
+  };
+
+  const openEditForm = (event: CalendarEvent) => {
+    setFormData({
+      title: event.title || '',
+      description: event.description || '',
+      date: event.date || '',
+      time: event.time || '',
+      location: event.location || '',
+    });
+    setEditingId(event.id);
+    setFormError(null);
+    setActionError(null);
+    setRemoveConfirmId(null);
+    setMode('edit');
+  };
+
+  const closeForm = () => {
+    setMode('list');
+    setEditingId(null);
+    setFormError(null);
+    setFormData(EMPTY_EVENT_FORM);
+  };
+
+  const updateField = (field: keyof EventFormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase
-      .from('calendar_events')
-      .insert({
-        ...formData,
-        is_active: true,
-      });
+
+    const title = formData.title.trim();
+    if (!title) {
+      setFormError('Please enter a name for the event.');
+      return;
+    }
+    if (!formData.date) {
+      setFormError('Please choose a date for the event.');
+      return;
+    }
+
+    setSaving(true);
+    setFormError(null);
+
+    const payload = {
+      title,
+      description: formData.description.trim() || null,
+      date: formData.date,
+      time: formData.time || null,
+      location: formData.location.trim() || null,
+    };
+
+    const { error } =
+      mode === 'edit' && editingId
+        ? await supabase.from('calendar_events').update(payload).eq('id', editingId)
+        : await supabase.from('calendar_events').insert({ ...payload, is_active: true });
+
+    setSaving(false);
 
     if (error) {
-      alert('Error creating event. Please try again.');
-    } else {
-      alert('Event created successfully!');
-      setShowForm(false);
-      setFormData({ title: '', description: '', date: '', time: '', location: '' });
-      await loadEvents();
+      console.error('Error saving event:', error);
+      setFormError('Sorry, the event could not be saved. Please check your connection and try again.');
+      return;
     }
+
+    closeForm();
+    await loadEvents();
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this event?')) return;
+  const handleRemove = async (id: string) => {
+    setRemovingId(id);
+    setActionError(null);
     const { error } = await supabase
       .from('calendar_events')
-      .delete()
+      .update({ is_active: false })
       .eq('id', id);
+    setRemovingId(null);
 
     if (error) {
-      alert('Error deleting event. Please try again.');
-    } else {
-      await loadEvents();
+      console.error('Error removing event:', error);
+      setActionError('Sorry, that event could not be removed. Please try again.');
+      return;
     }
+
+    setRemoveConfirmId(null);
+    await loadEvents();
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
+  const today = todayISO();
+  const isFormOpen = mode === 'add' || mode === 'edit';
 
   return (
     <div className="admin-dashboard__tab-content">
       <Card variant="elevated" padding="lg">
         <div className="admin-dashboard__section-header">
-          <div>
-            <h2 className="admin-dashboard__editor-title">Calendar Events</h2>
-            <p className="admin-dashboard__editor-subtitle">Manage upcoming events and activities</p>
+          <div className="admin-dashboard__section-heading">
+            <h2 className="admin-dashboard__editor-title">Events shown on the website</h2>
+            <p className="admin-dashboard__editor-subtitle">
+              Add upcoming events here. Events with a future date automatically appear in the
+              &ldquo;Upcoming Events&rdquo; section of your website. Past events stay in this list for your
+              records but are hidden from visitors.
+            </p>
           </div>
-          <Button variant="primary" size="md" onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'Cancel' : '➕ Add New Event'}
-          </Button>
+          {mode === 'list' && (
+            <Button variant="primary" size="lg" onClick={openAddForm}>
+              ➕ Add Event
+            </Button>
+          )}
         </div>
 
-        {showForm && (
-          <form onSubmit={handleSubmit} className="admin-dashboard__form" style={{ marginTop: '2rem' }}>
+        {actionError && (
+          <div className="admin-dashboard__events-banner" role="alert">
+            {actionError}
+          </div>
+        )}
+
+        {isFormOpen && (
+          <form onSubmit={handleSubmit} className="admin-dashboard__event-form">
+            <div className="admin-dashboard__event-form-head">
+              <h3 className="admin-dashboard__event-form-title">
+                {mode === 'edit' ? 'Edit event' : 'Add a new event'}
+              </h3>
+              <p className="admin-dashboard__event-form-help">
+                Fill in the details below. Only the event name and date are required.
+              </p>
+            </div>
+
+            {formError && (
+              <div className="admin-dashboard__event-form-error" role="alert">
+                {formError}
+              </div>
+            )}
+
             <div className="admin-dashboard__field">
-              <label>Event Title *</label>
+              <label htmlFor="event-title">Event name</label>
               <input
+                id="event-title"
                 type="text"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
-                placeholder="Event name"
+                onChange={(e) => updateField('title', e.target.value)}
+                placeholder="For example: Community Christmas Dinner"
+                autoFocus
               />
             </div>
-            <div className="admin-dashboard__field">
-              <label>Description</label>
-              <textarea
-                rows={3}
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Event description"
-              />
-            </div>
+
             <div className="admin-dashboard__field-row">
               <div className="admin-dashboard__field">
-                <label>Date *</label>
+                <label htmlFor="event-date">Date</label>
                 <input
+                  id="event-date"
                   type="date"
                   value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  required
+                  onChange={(e) => updateField('date', e.target.value)}
                 />
               </div>
               <div className="admin-dashboard__field">
-                <label>Time</label>
+                <label htmlFor="event-time">Start time (optional)</label>
                 <input
+                  id="event-time"
                   type="time"
                   value={formData.time}
-                  onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                  onChange={(e) => updateField('time', e.target.value)}
                 />
               </div>
             </div>
+
             <div className="admin-dashboard__field">
-              <label>Location</label>
+              <label htmlFor="event-location">Location (optional)</label>
               <input
+                id="event-location"
                 type="text"
                 value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="Event location"
+                onChange={(e) => updateField('location', e.target.value)}
+                placeholder="For example: My Refuge Center, Bartlesville"
               />
             </div>
-            <Button type="submit" variant="primary" size="md">
-              Save Event
-            </Button>
+
+            <div className="admin-dashboard__field">
+              <label htmlFor="event-description">Description (optional)</label>
+              <textarea
+                id="event-description"
+                rows={3}
+                value={formData.description}
+                onChange={(e) => updateField('description', e.target.value)}
+                placeholder="A short note about what the event is and who it is for."
+              />
+            </div>
+
+            <div className="admin-dashboard__event-form-actions">
+              <Button type="submit" variant="primary" size="lg" disabled={saving}>
+                {saving ? 'Saving…' : mode === 'edit' ? 'Save changes' : 'Save event'}
+              </Button>
+              <Button type="button" variant="outline" size="lg" onClick={closeForm} disabled={saving}>
+                Cancel
+              </Button>
+            </div>
           </form>
         )}
 
-        {loading ? (
-          <div className="admin-dashboard__loading-state">Loading events...</div>
-        ) : events.length === 0 ? (
-          <div className="admin-dashboard__empty-state">
-            <p>No events scheduled yet.</p>
-            <p className="admin-dashboard__empty-hint">Click "Add New Event" to create your first event.</p>
-          </div>
-        ) : (
-          <div className="admin-dashboard__events-list" style={{ marginTop: '2rem' }}>
-            {events.map((event) => (
-              <div key={event.id} className="admin-dashboard__event-item">
-                <div>
-                  <h3>{event.title}</h3>
-                  {event.description && <p>{event.description}</p>}
-                  <p>
-                    📅 {formatDate(event.date)}
-                    {event.time && ` at ${event.time}`}
-                    {event.location && ` • 📍 ${event.location}`}
-                  </p>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => handleDelete(event.id)}>
-                  Delete
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
+        {!isFormOpen &&
+          (loading ? (
+            <div className="admin-dashboard__loading-state">Loading events…</div>
+          ) : events.length === 0 ? (
+            <div className="admin-dashboard__events-empty">
+              <span className="admin-dashboard__events-empty-icon" aria-hidden="true">
+                📅
+              </span>
+              <h3>No events yet</h3>
+              <p>When you add an event, it will show here and on your website.</p>
+              <Button variant="primary" size="lg" onClick={openAddForm}>
+                ➕ Add your first event
+              </Button>
+            </div>
+          ) : (
+            <div className="admin-dashboard__events-list">
+              {events.map((event) => {
+                const isPast = event.date < today;
+                const confirmingRemove = removeConfirmId === event.id;
+                return (
+                  <div
+                    key={event.id}
+                    className={`admin-dashboard__event-card ${isPast ? 'is-past' : ''}`}
+                  >
+                    <div className="admin-dashboard__event-datebox" aria-hidden="true">
+                      <span className="admin-dashboard__event-month">{formatEventMonth(event.date)}</span>
+                      <span className="admin-dashboard__event-day">{formatEventDay(event.date)}</span>
+                    </div>
+
+                    <div className="admin-dashboard__event-main">
+                      <div className="admin-dashboard__event-titlerow">
+                        <h3 className="admin-dashboard__event-title">{event.title}</h3>
+                        {isPast && (
+                          <span className="admin-dashboard__event-badge">Past · hidden from visitors</span>
+                        )}
+                      </div>
+                      <p className="admin-dashboard__event-when">
+                        {formatEventFullDate(event.date)}
+                        {event.time && ` · ${formatEventTime(event.time)}`}
+                      </p>
+                      {event.location && (
+                        <p className="admin-dashboard__event-meta">📍 {event.location}</p>
+                      )}
+                      {event.description && (
+                        <p className="admin-dashboard__event-desc">{event.description}</p>
+                      )}
+                    </div>
+
+                    <div className="admin-dashboard__event-actions">
+                      {confirmingRemove ? (
+                        <div className="admin-dashboard__event-confirm">
+                          <span className="admin-dashboard__event-confirm-text">
+                            Remove from the website?
+                          </span>
+                          <div className="admin-dashboard__event-confirm-buttons">
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              className="admin-dashboard__btn-danger"
+                              onClick={() => handleRemove(event.id)}
+                              disabled={removingId === event.id}
+                            >
+                              {removingId === event.id ? 'Removing…' : 'Yes, remove'}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setRemoveConfirmId(null)}
+                              disabled={removingId === event.id}
+                            >
+                              Keep
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <Button variant="outline" size="sm" onClick={() => openEditForm(event)}>
+                            Edit
+                          </Button>
+                          <Button
+                            variant="text"
+                            size="sm"
+                            className="admin-dashboard__btn-danger-text"
+                            onClick={() => {
+                              setActionError(null);
+                              setRemoveConfirmId(event.id);
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
       </Card>
     </div>
   );

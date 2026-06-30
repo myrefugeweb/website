@@ -3,6 +3,9 @@ import { supabase } from '../../lib/supabase';
 import { Button } from '../Button';
 import { ImageLibrary } from '../ImageLibrary';
 import { LayoutPreview } from '../LayoutPreview';
+import { InlineTextEditor, type InlineTextEditSession } from './InlineTextEditor';
+import { getContentKeyFromElement } from './editorContentKeys';
+import { getTextRoleFromElement } from './editorTypography';
 import { HomePage } from '../../pages/HomePage';
 import { SparrowsClosetPage } from '../../pages/SparrowsClosetPage';
 import { StagingProvider } from '../../contexts/StagingContext';
@@ -163,7 +166,7 @@ const SectionLayoutButton: React.FC<{ section: string; onSelect: () => void; isU
         }}
       >
         <span className="visual-editor__layout-button-icon">🎨</span>
-        <span className="visual-editor__layout-button-text">Layout</span>
+        <span className="visual-editor__layout-button-text">{getSectionDisplayName(section)} Layout</span>
       </button>
       {isUnpublished && (
         <span style={{
@@ -193,7 +196,30 @@ interface EditableElement {
   selector: string;
   currentValue?: string;
   imageUrl?: string;
+  domElement?: HTMLElement;
 }
+
+const SECTION_DISPLAY_NAMES: Record<string, string> = {
+  hero: 'Homepage Hero',
+  mission: 'Mission',
+  story: 'Story',
+  help: 'How You Can Help',
+  impact: 'Impact',
+  contact: 'Contact',
+  stats: 'Stats',
+  'sparrows-closet': 'Sparrows Closet Preview',
+  'sparrows-closet-hero': 'Sparrows Closet Hero',
+  'sparrows-closet-info': 'Sparrows Closet Info',
+  'sparrows-closet-impact': 'Sparrows Closet Impact',
+  'sparrows-closet-cta': 'Sparrows Closet Call to Action',
+};
+
+const getSectionDisplayName = (section: string) =>
+  SECTION_DISPLAY_NAMES[section] ||
+  section
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 
 interface EditModalProps {
   isOpen: boolean;
@@ -202,111 +228,7 @@ interface EditModalProps {
   onSave: (value: string) => Promise<void>;
 }
 
-const EditTextModal: React.FC<EditModalProps> = ({ isOpen, element, onClose, onSave }) => {
-  const [value, setValue] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [isHtml, setIsHtml] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
-  useEffect(() => {
-    if (element && isOpen) {
-      const currentValue = element.currentValue || '';
-      setValue(currentValue);
-      // Check if content contains HTML tags
-      setIsHtml(/<[^>]+>/.test(currentValue));
-      setError(null);
-      setSuccess(false);
-    }
-  }, [element, isOpen]);
-
-  if (!isOpen || !element) return null;
-
-  const handleSave = async () => {
-    setSaving(true);
-    setError(null);
-    setSuccess(false);
-    try {
-      await onSave(value);
-      setSuccess(true);
-      // Close modal after a brief delay to show success message
-      setTimeout(() => {
-        onClose();
-      }, 500);
-    } catch (err: any) {
-      console.error('Error saving:', err);
-      setError(err.message || 'Error saving changes. Please try again.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="visual-editor__modal-overlay" onClick={onClose}>
-      <div className="visual-editor__modal" onClick={(e) => e.stopPropagation()}>
-        <div className="visual-editor__modal-header">
-          <h3>Edit Text</h3>
-          <button className="visual-editor__modal-close" onClick={onClose}>×</button>
-        </div>
-        <div className="visual-editor__modal-body">
-          <label>Content:</label>
-          {isHtml && (
-            <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>
-              HTML detected. You can use HTML tags like &lt;span&gt; for formatting.
-            </p>
-          )}
-          <textarea
-            value={value}
-            onChange={(e) => {
-              setValue(e.target.value);
-              setError(null);
-            }}
-            rows={6}
-            className="visual-editor__modal-textarea"
-            placeholder="Enter text content..."
-            disabled={saving}
-          />
-          {error && (
-            <div style={{
-              marginTop: '1rem',
-              padding: '0.75rem',
-              background: '#FEE',
-              border: '1px solid #FCC',
-              borderRadius: '0.5rem',
-              color: '#C33',
-              fontSize: '0.875rem',
-            }}>
-              <strong>Error:</strong> {error}
-            </div>
-          )}
-          {success && (
-            <div style={{
-              marginTop: '1rem',
-              padding: '0.75rem',
-              background: '#EFE',
-              border: '1px solid #CFC',
-              borderRadius: '0.5rem',
-              color: '#3C3',
-              fontSize: '0.875rem',
-            }}>
-              <strong>✓ Saved!</strong> Changes will appear immediately. Click "Publish Changes" to make them live.
-            </div>
-          )}
-        </div>
-        <div className="visual-editor__modal-footer">
-          <Button variant="outline" size="md" onClick={onClose} disabled={saving}>
-            Cancel
-          </Button>
-          <Button variant="primary" size="md" onClick={handleSave} disabled={saving || success}>
-            {saving ? 'Saving...' : success ? 'Saved!' : 'Save Changes'}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const EditImageModal: React.FC<EditModalProps & { imageUrl?: string; section?: string }> = ({ 
+const EditImageModal: React.FC<EditModalProps & { imageUrl?: string; section?: string }> = ({
   isOpen, 
   element, 
   onClose, 
@@ -409,6 +331,7 @@ export const VisualEditor: React.FC = () => {
   const [editMode, setEditMode] = useState(true);
   const [selectedElement, setSelectedElement] = useState<EditableElement | null>(null);
   const [editModalType, setEditModalType] = useState<'text' | 'image' | null>(null);
+  const [inlineTextEdit, setInlineTextEdit] = useState<InlineTextEditSession | null>(null);
   const [editableElements, setEditableElements] = useState<EditableElement[]>([]);
   const [showImageLibrary, setShowImageLibrary] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
@@ -417,7 +340,8 @@ export const VisualEditor: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<'home' | 'sparrows-closet'>('home');
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
-  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [reverting, setReverting] = useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
   // Load unpublished changes on component mount and when page changes
@@ -544,11 +468,11 @@ export const VisualEditor: React.FC = () => {
         });
       }
       
-      // Reload page to show new layout (layout changes require full reload)
-      window.location.reload();
+      // Notify section components to re-read their layout in place — no full reload.
+      window.dispatchEvent(new CustomEvent('layout-updated', { detail: { section } }));
+      setSelectedSection(null);
     } catch (error: any) {
       console.error('Error updating layout:', error);
-      // Error will be visible in console, page reload will show previous state
     }
   };
 
@@ -656,6 +580,84 @@ export const VisualEditor: React.FC = () => {
     }
   };
 
+  // Discard all unpublished changes by restoring staged values from the
+  // last published values (layouts, images, and text content).
+  const handleDiscardAll = async () => {
+    setReverting(true);
+    setPublishError(null);
+    try {
+      // 1. Revert layouts: copy published_layout_type back into layout_type.
+      const { data: layoutRows } = await supabase
+        .from('section_layouts')
+        .select('section, published_layout_type')
+        .eq('has_unpublished_changes', true);
+
+      for (const row of layoutRows || []) {
+        await supabase
+          .from('section_layouts')
+          .update({
+            layout_type: row.published_layout_type || 'default',
+            has_unpublished_changes: false,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('section', row.section);
+      }
+
+      // 2. Revert images: restore is_active to its published state.
+      const { data: imageRows } = await supabase
+        .from('images')
+        .select('id, published_is_active')
+        .eq('has_unpublished_changes', true);
+
+      for (const row of imageRows || []) {
+        await supabase
+          .from('images')
+          .update({
+            is_active: row.published_is_active ?? false,
+            has_unpublished_changes: false,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', row.id);
+      }
+
+      // 3. Revert text content: restore content_value to published value.
+      try {
+        const { data: contentRows } = await supabase
+          .from('section_content')
+          .select('section, content_key, published_content_value')
+          .eq('has_unpublished_changes', true);
+
+        for (const row of contentRows || []) {
+          await supabase
+            .from('section_content')
+            .update({
+              content_value: row.published_content_value || '',
+              has_unpublished_changes: false,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('section', row.section)
+            .eq('content_key', row.content_key);
+        }
+      } catch (contentError: any) {
+        if (contentError?.code !== 'PGRST205') {
+          console.error('Error reverting content:', contentError);
+        }
+      }
+
+      setUnpublishedSections(new Set());
+      setShowDiscardConfirm(false);
+
+      // Reload so the preview reflects the restored values everywhere,
+      // replacing any in-place DOM edits with the published content.
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error discarding changes:', error);
+      setPublishError(error.message || 'Failed to discard changes. Please try again.');
+    } finally {
+      setReverting(false);
+    }
+  };
+
   const markEditableElements = () => {
     const foundElements: EditableElement[] = [];
     
@@ -695,10 +697,22 @@ export const VisualEditor: React.FC = () => {
       { selector: '.story-section__subtitle', section: 'story' },
       { selector: '.story-section__story-title', section: 'story' },
       { selector: '.story-section__story-text', section: 'story' },
+      { selector: '.help__title', section: 'help' },
+      { selector: '.help__text', section: 'help' },
+      { selector: '.impact__title', section: 'impact' },
+      { selector: '.impact__subtitle', section: 'impact' },
+      { selector: '.impact__story-title', section: 'impact' },
+      { selector: '.impact__story-text', section: 'impact' },
       { selector: '.stats-section__value', section: 'stats' },
       { selector: '.stats-section__label', section: 'stats' },
       { selector: '.impact__stat-value', section: 'impact' },
       { selector: '.impact__stat-label', section: 'impact' },
+      { selector: '.impact__stat-description', section: 'impact' },
+      { selector: '.contact__title', section: 'contact' },
+      { selector: '.contact__text', section: 'contact' },
+      { selector: '.sparrows-closet__title', section: 'sparrows-closet' },
+      { selector: '.sparrows-closet__text', section: 'sparrows-closet' },
+      { selector: '.sparrows-closet__button', section: 'sparrows-closet' },
     ];
 
     textSelectors.forEach(({ selector, section: defaultSection }) => {
@@ -714,6 +728,11 @@ export const VisualEditor: React.FC = () => {
         // Try to find section from parent
         const section = el.closest('section')?.className.split(' ')[0]?.replace('__', '-') || defaultSection;
         el.setAttribute('data-editable-section', section);
+
+        const htmlEl = el as HTMLElement;
+        const roleMeta = getTextRoleFromElement(htmlEl);
+        htmlEl.setAttribute('data-editable-role', roleMeta.role);
+        htmlEl.setAttribute('data-editable-role-label', roleMeta.label);
         
         // Store current text content
         const currentValue = el.textContent || '';
@@ -736,6 +755,10 @@ export const VisualEditor: React.FC = () => {
     if (!editMode) return;
 
     const target = e.target as HTMLElement;
+
+    if (target.closest('.inline-text-editor') || inlineTextEdit) {
+      return;
+    }
     
     // Don't trigger if clicking on layout button
     if (target.closest('.visual-editor__layout-button')) {
@@ -814,19 +837,51 @@ export const VisualEditor: React.FC = () => {
     }
     
     if (element) {
+      if (element.type === 'text' && editableSection) {
+        const domEl = document.querySelector(`[data-editable="${editableId}"]`) as HTMLElement | null;
+        if (!domEl) return;
+
+        const roleMeta = getTextRoleFromElement(domEl);
+        const initialValue = roleMeta.allowsHtml
+          ? domEl.innerHTML
+          : (domEl.textContent || '');
+        const contentKey = getContentKeyFromElement(domEl, editableId, editableSection);
+
+        setInlineTextEdit({
+          element: domEl,
+          section: editableSection,
+          contentKey,
+          elementId: editableId,
+          initialValue,
+        });
+        return;
+      }
+
       setSelectedElement(element);
       setEditModalType(element.type);
     }
   };
 
-  const handleSaveText = async (value: string) => {
-    if (!selectedElement) return;
+  interface SaveTextContext {
+    section: string;
+    contentKey: string;
+    selector: string;
+  }
 
-    const targetSection = selectedElement.section;
-    // Extract content key from element ID (e.g., 'text-hero__title-0' -> 'title')
-    // Or use a more specific mapping
-    const elementId = selectedElement.id;
-    const contentKey = getContentKeyFromElementId(elementId, targetSection);
+  const handleSaveText = async (value: string, ctx?: SaveTextContext) => {
+    const targetSection = ctx?.section ?? selectedElement?.section;
+    const contentKey = ctx?.contentKey ?? (
+      selectedElement
+        ? getContentKeyFromElement(
+            document.querySelector(selectedElement.selector) as HTMLElement,
+            selectedElement.id,
+            selectedElement.section,
+          )
+        : ''
+    );
+    const selector = ctx?.selector ?? selectedElement?.selector ?? '';
+
+    if (!targetSection || !contentKey) return;
 
     try {
       // Check if content exists
@@ -879,10 +934,10 @@ export const VisualEditor: React.FC = () => {
       // Also update the DOM directly for instant visual feedback
       // Use requestAnimationFrame to ensure we update after React finishes rendering
       requestAnimationFrame(() => {
-        // Try multiple ways to find the element
-        let element = document.querySelector(selectedElement.selector) as HTMLElement;
+        let element = selector
+          ? (document.querySelector(selector) as HTMLElement)
+          : null;
         
-        // Fallback: try finding by section and content key
         if (!element && targetSection === 'hero' && contentKey === 'title') {
           element = document.querySelector('.hero__title') as HTMLElement;
         }
@@ -891,8 +946,6 @@ export const VisualEditor: React.FC = () => {
         }
         
         if (element) {
-          // For hero title and other elements that use dangerouslySetInnerHTML, always use innerHTML
-          // Check if it's a hero title or if the value contains HTML
           const isHeroTitle = targetSection === 'hero' && contentKey === 'title';
           const containsHtml = /<[^>]+>/.test(value);
           
@@ -904,11 +957,8 @@ export const VisualEditor: React.FC = () => {
         }
       });
 
-      // Reload all unpublished changes to ensure state is accurate
       await loadAllUnpublishedChanges();
-
-      // Don't close modal here - let the modal handle it after showing success
-      // The modal will close itself after showing the success message
+      setInlineTextEdit(null);
     } catch (error: any) {
       console.error('Error saving text:', error);
       
@@ -918,58 +968,6 @@ export const VisualEditor: React.FC = () => {
       }
       throw error;
     }
-  };
-
-  // Helper function to map element IDs to content keys
-  const getContentKeyFromElementId = (elementId: string, section: string): string => {
-    // Map common patterns to content keys
-    if (elementId.includes('hero__title') || elementId.includes('h1')) {
-      return 'title';
-    }
-    if (elementId.includes('hero__description')) {
-      return 'description';
-    }
-    if (elementId.includes('mission__title') || (section === 'mission' && elementId.includes('h2'))) {
-      return 'title';
-    }
-    if (elementId.includes('mission__text')) {
-      // For multiple paragraphs, use index
-      const match = elementId.match(/mission__text-(\d+)/);
-      return match ? `text-${match[1]}` : 'text-1';
-    }
-    if (elementId.includes('story-section__title')) {
-      return 'title';
-    }
-    if (elementId.includes('story-section__subtitle')) {
-      return 'subtitle';
-    }
-    if (elementId.includes('story-section__story-title')) {
-      const match = elementId.match(/story-section__story-title-(\d+)/);
-      return match ? `story-title-${match[1]}` : 'story-title-1';
-    }
-    if (elementId.includes('story-section__story-text')) {
-      const match = elementId.match(/story-section__story-text-(\d+)/);
-      return match ? `story-text-${match[1]}` : 'story-text-1';
-    }
-    if (elementId.includes('stats-section__value')) {
-      const match = elementId.match(/stats-section__value-(\d+)/);
-      return match ? `stat-value-${match[1]}` : 'stat-value-1';
-    }
-    if (elementId.includes('stats-section__label')) {
-      const match = elementId.match(/stats-section__label-(\d+)/);
-      return match ? `stat-label-${match[1]}` : 'stat-label-1';
-    }
-    if (elementId.includes('impact__stat-value')) {
-      const match = elementId.match(/impact__stat-value-(\d+)/);
-      return match ? `stat-value-${match[1]}` : 'stat-value-1';
-    }
-    if (elementId.includes('impact__stat-label')) {
-      const match = elementId.match(/impact__stat-label-(\d+)/);
-      return match ? `stat-label-${match[1]}` : 'stat-label-1';
-    }
-    
-    // Default: use element ID as content key (sanitized)
-    return elementId.replace(/[^a-zA-Z0-9-]/g, '-').toLowerCase();
   };
 
   const handleSaveImage = async (imageUrl: string) => {
@@ -1141,94 +1139,88 @@ export const VisualEditor: React.FC = () => {
     <div className="visual-editor">
       <div className="visual-editor__toolbar">
         <div className="visual-editor__toolbar-left">
-          <h2 className="visual-editor__title">Visual Editor</h2>
-          <p className="visual-editor__subtitle">
-            {isOnboarding ? '🎓 Demo Mode - Learn by doing! Nothing will be published.' : 'Click on any text or image to edit it'}
+          <div
+            className="visual-editor__page-switch"
+            role="group"
+            aria-label="Choose which page to edit"
+            data-onboarding="page-switcher"
+          >
+            <button
+              type="button"
+              className={`visual-editor__page-option ${currentPage === 'home' ? 'is-active' : ''}`}
+              onClick={() => setCurrentPage('home')}
+              aria-pressed={currentPage === 'home'}
+            >
+              🏠 My Refuge
+            </button>
+            <button
+              type="button"
+              className={`visual-editor__page-option ${currentPage === 'sparrows-closet' ? 'is-active' : ''}`}
+              onClick={() => setCurrentPage('sparrows-closet')}
+              aria-pressed={currentPage === 'sparrows-closet'}
+            >
+              🦅 Sparrows Closet
+            </button>
+          </div>
+          <p className="visual-editor__hint">
+            {isOnboarding
+              ? '🎓 Demo Mode — nothing will be published.'
+              : editMode
+                ? 'Click any text to edit it · click an image to swap it'
+                : 'Preview mode — turn on editing to make changes'}
           </p>
         </div>
         <div className="visual-editor__toolbar-right">
-          {unpublishedSections.size > 0 && (
-            <div className="visual-editor__unpublished-badge" style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              background: '#FFF3CD',
-              border: '1px solid #FFC107',
-              borderRadius: '0.5rem',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              color: '#856404',
-              marginRight: '1rem',
-            }}>
-              <span>⚠️</span>
-              <span>{unpublishedSections.size} Unpublished Change{unpublishedSections.size > 1 ? 's' : ''}</span>
-            </div>
-          )}
-          <Button
-            variant="secondary"
-            size="md"
-            onClick={() => setCurrentPage(currentPage === 'home' ? 'sparrows-closet' : 'home')}
-          >
-            {currentPage === 'home' ? '🦅 Sparrows Closet' : '🏠 My Refuge'}
-          </Button>
           <Button
             variant="outline"
             size="md"
             onClick={() => setShowImageLibrary(true)}
+            data-onboarding="image-library"
           >
             🖼️ Image Library
-          </Button>
-          {unpublishedSections.size > 0 && (
-            <>
-              <Button
-                variant="primary"
-                size="md"
-                onClick={handlePublishAll}
-                disabled={publishing}
-                style={{
-                  background: '#28A745',
-                  borderColor: '#28A745',
-                }}
-                title={publishError || undefined}
-              >
-                {publishing ? '⏳ Publishing...' : '🚀 Publish Changes'}
-              </Button>
-              {publishError && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  right: 0,
-                  marginTop: '0.5rem',
-                  padding: '0.75rem',
-                  background: '#FEE',
-                  border: '1px solid #FCC',
-                  borderRadius: '0.5rem',
-                  color: '#C33',
-                  fontSize: '0.875rem',
-                  zIndex: 1000,
-                  maxWidth: '300px',
-                }}>
-                  <strong>Error:</strong> {publishError}
-                </div>
-              )}
-            </>
-          )}
-          <Button
-            variant="outline"
-            size="md"
-            onClick={() => setShowHelpModal(true)}
-            title="View help and instructions"
-          >
-            ❓ Help
           </Button>
           <Button
             variant={editMode ? 'primary' : 'outline'}
             size="md"
             onClick={() => setEditMode(!editMode)}
+            data-onboarding="edit-mode-toggle"
           >
-            {editMode ? '✏️ Edit Mode: ON' : '👁️ Preview Mode'}
+            {editMode ? '✏️ Editing' : '👁️ Preview'}
           </Button>
+          {unpublishedSections.size > 0 && (
+            <div className="visual-editor__publish-group" data-onboarding="publish-status">
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => setShowDiscardConfirm(true)}
+                disabled={publishing || reverting}
+                title="Discard all unpublished changes"
+              >
+                {reverting ? '⏳ Reverting...' : '↩️ Discard'}
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={handlePublishAll}
+                disabled={publishing || reverting}
+                data-onboarding="publish-changes"
+                style={{
+                  background: 'var(--color-success)',
+                  borderColor: 'var(--color-success)',
+                }}
+                title={publishError || undefined}
+              >
+                {publishing
+                  ? '⏳ Publishing...'
+                  : `🚀 Publish ${unpublishedSections.size} change${unpublishedSections.size > 1 ? 's' : ''}`}
+              </Button>
+              {publishError && (
+                <div className="visual-editor__publish-error">
+                  <strong>Error:</strong> {publishError}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -1250,7 +1242,6 @@ export const VisualEditor: React.FC = () => {
         {editMode && currentPage === 'home' && (
           <>
             <SectionLayoutButton section="hero" onSelect={() => setSelectedSection('hero')} isUnpublished={unpublishedSections.has('hero')} />
-            <SectionLayoutButton section="stats-section" onSelect={() => setSelectedSection('stats')} isUnpublished={unpublishedSections.has('stats-section')} />
             <SectionLayoutButton section="mission" onSelect={() => setSelectedSection('mission')} isUnpublished={unpublishedSections.has('mission')} />
             <SectionLayoutButton section="story" onSelect={() => setSelectedSection('story')} isUnpublished={unpublishedSections.has('story')} />
             <SectionLayoutButton section="help" onSelect={() => setSelectedSection('help')} isUnpublished={unpublishedSections.has('help')} />
@@ -1268,15 +1259,17 @@ export const VisualEditor: React.FC = () => {
         )}
       </div>
 
-      {editModalType === 'text' && (
-        <EditTextModal
-          isOpen={!!selectedElement}
-          element={selectedElement}
-          onClose={() => {
-            setSelectedElement(null);
-            setEditModalType(null);
-          }}
-          onSave={handleSaveText}
+      {inlineTextEdit && (
+        <InlineTextEditor
+          session={inlineTextEdit}
+          onSave={(value) =>
+            handleSaveText(value, {
+              section: inlineTextEdit.section,
+              contentKey: inlineTextEdit.contentKey,
+              selector: `[data-editable="${inlineTextEdit.elementId}"]`,
+            })
+          }
+          onCancel={() => setInlineTextEdit(null)}
         />
       )}
 
@@ -1317,25 +1310,22 @@ export const VisualEditor: React.FC = () => {
         <div className="visual-editor__layout-overlay" onClick={() => setSelectedSection(null)}>
           <div className="visual-editor__layout-modal" onClick={(e) => e.stopPropagation()}>
             <div className="visual-editor__layout-header">
-              <h3>Layout Options for {selectedSection}</h3>
+              <h3>{getSectionDisplayName(selectedSection)} Layout</h3>
               <button className="visual-editor__modal-close" onClick={() => setSelectedSection(null)}>×</button>
             </div>
             <div className="visual-editor__layout-body">
+              <p className="visual-editor__layout-intro">
+                Pick a layout for this section. The preview shows how your real text, images, and calls to action will be arranged on the live site.
+              </p>
               <div className="visual-editor__layout-previews">
                 {['default', 'layout-2', 'layout-3'].map((layout) => (
-                  <div
+                  <LayoutPreview
                     key={layout}
-                    className={`visual-editor__layout-preview-item ${sectionLayouts[selectedSection] === layout ? 'visual-editor__layout-preview-item--active' : ''}`}
+                    layoutType={layout}
+                    section={selectedSection}
+                    isSelected={sectionLayouts[selectedSection] === layout}
                     onClick={() => handleLayoutChange(selectedSection, layout)}
-                  >
-                    <LayoutPreview
-                      layoutType={layout}
-                      section={selectedSection as any}
-                      isSelected={sectionLayouts[selectedSection] === layout}
-                      onClick={() => handleLayoutChange(selectedSection, layout)}
-                    />
-                    <p className="visual-editor__layout-label">{layout === 'default' ? 'Default' : layout === 'layout-2' ? 'Layout 2' : 'Layout 3'}</p>
-                  </div>
+                  />
                 ))}
               </div>
             </div>
@@ -1343,67 +1333,37 @@ export const VisualEditor: React.FC = () => {
         </div>
       )}
 
-      {showHelpModal && (
-        <div className="visual-editor__modal-overlay" onClick={() => setShowHelpModal(false)}>
-          <div className="visual-editor__modal" onClick={(e) => e.stopPropagation()}>
+      {showDiscardConfirm && (
+        <div className="visual-editor__modal-overlay" onClick={() => !reverting && setShowDiscardConfirm(false)}>
+          <div className="visual-editor__modal visual-editor__discard-modal" onClick={(e) => e.stopPropagation()}>
             <div className="visual-editor__modal-header">
-              <h3>Visual Editor Help</h3>
-              <button className="visual-editor__modal-close" onClick={() => setShowHelpModal(false)}>×</button>
+              <h3>Discard unpublished changes?</h3>
+              <button
+                className="visual-editor__modal-close"
+                onClick={() => setShowDiscardConfirm(false)}
+                disabled={reverting}
+              >
+                ×
+              </button>
             </div>
             <div className="visual-editor__modal-body">
-              <div className="visual-editor__help-content">
-                <div className="visual-editor__help-section">
-                  <h4>📝 Editing Content</h4>
-                  <ul>
-                    <li><strong>Click on any text or image</strong> to edit it directly</li>
-                    <li><strong>Editable elements</strong> are highlighted when you hover over them</li>
-                    <li><strong>Text changes</strong> are saved automatically when you click "Save Changes"</li>
-                    <li><strong>Image changes</strong> are saved when you select a new image from the library</li>
-                  </ul>
-                </div>
-
-                <div className="visual-editor__help-section">
-                  <h4>🎨 Changing Layouts</h4>
-                  <ul>
-                    <li><strong>Click the "Layout" button</strong> that appears on each section</li>
-                    <li><strong>Choose from 3 layout options</strong> for each section</li>
-                    <li><strong>Layout changes</strong> apply immediately but require a page reload</li>
-                    <li><strong>Each section</strong> can have its own unique layout</li>
-                  </ul>
-                </div>
-
-                <div className="visual-editor__help-section">
-                  <h4>🚀 Staging & Publishing</h4>
-                  <ul>
-                    <li><strong>All changes are saved in "staging" mode</strong> - they won't appear on the live site until published</li>
-                    <li><strong>Unpublished changes</strong> are marked with an orange "Unpublished" badge</li>
-                    <li><strong>Click "Publish Changes"</strong> to make all pending changes visible to visitors</li>
-                    <li><strong>You can make multiple edits</strong> before publishing - they'll all be published together</li>
-                  </ul>
-                </div>
-
-                <div className="visual-editor__help-section">
-                  <h4>🖼️ Image Library</h4>
-                  <ul>
-                    <li><strong>Click "Image Library"</strong> to view and manage all uploaded images</li>
-                    <li><strong>Upload new images</strong> directly from the library</li>
-                    <li><strong>Select an image</strong> to use it in any section</li>
-                  </ul>
-                </div>
-
-                <div className="visual-editor__help-section">
-                  <h4>👁️ Preview Mode</h4>
-                  <ul>
-                    <li><strong>Toggle "Preview Mode"</strong> to see how the site looks without editing controls</li>
-                    <li><strong>Preview Mode</strong> shows the published version of your site</li>
-                    <li><strong>Switch back to Edit Mode</strong> to continue making changes</li>
-                  </ul>
-                </div>
-              </div>
+              <p className="visual-editor__discard-text">
+                This will restore <strong>{unpublishedSections.size} section{unpublishedSections.size > 1 ? 's' : ''}</strong> to the
+                currently published version. All unsaved text, image, and layout edits will be lost. This cannot be undone.
+              </p>
             </div>
             <div className="visual-editor__modal-footer">
-              <Button variant="primary" size="md" onClick={() => setShowHelpModal(false)}>
-                Got it!
+              <Button variant="outline" size="md" onClick={() => setShowDiscardConfirm(false)} disabled={reverting}>
+                Keep editing
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={handleDiscardAll}
+                disabled={reverting}
+                style={{ background: 'var(--color-error)', borderColor: 'var(--color-error)' }}
+              >
+                {reverting ? 'Reverting...' : 'Discard changes'}
               </Button>
             </div>
           </div>

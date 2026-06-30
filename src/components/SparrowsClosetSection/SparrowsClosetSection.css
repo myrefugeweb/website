@@ -1,6 +1,6 @@
 .sparrows-closet {
   padding: 8rem 2rem;
-  background: linear-gradient(180deg, #FFF5F5 0%, #FFEBEB 100%);
+  background: linear-gradient(180deg, var(--color-error-bg) 0%, var(--color-error-bg) 100%);
   min-height: auto;
   display: flex;
   align-items: center;
@@ -15,7 +15,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--color-error-rgb), 0.2), transparent);
 }
 
 .sparrows-closet__container {
@@ -38,40 +38,40 @@
   object-fit: cover;
   border-radius: 1.5rem;
   box-shadow: 
-    0 20px 40px -12px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+    0 20px 40px -12px rgba(var(--color-black-rgb), 0.15),
+    0 0 0 1px rgba(var(--color-black-rgb), 0.05);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sparrows-closet__image:hover img {
   transform: translateY(-8px) scale(1.01);
   box-shadow: 
-    0 30px 60px -12px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+    0 30px 60px -12px rgba(var(--color-black-rgb), 0.2),
+    0 0 0 1px rgba(var(--color-black-rgb), 0.05);
 }
 
 .sparrows-closet__image .image-placeholder {
   width: 100%;
   aspect-ratio: 4/3;
-  background: linear-gradient(135deg, #F0F0F0 0%, #E8E8E8 50%, #F5F5F5 100%);
+  background: linear-gradient(135deg, var(--color-gray-200) 0%, var(--color-gray-200) 50%, var(--color-gray-100) 100%);
   border-radius: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9E9E9E;
+  color: var(--color-text-secondary);
   font-size: 1rem;
   font-weight: 500;
   box-shadow: 
-    0 20px 40px -12px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+    0 20px 40px -12px rgba(var(--color-black-rgb), 0.1),
+    0 0 0 1px rgba(var(--color-black-rgb), 0.05);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sparrows-closet__image:hover .image-placeholder {
   transform: translateY(-8px) scale(1.01);
   box-shadow: 
-    0 30px 60px -12px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+    0 30px 60px -12px rgba(var(--color-black-rgb), 0.15),
+    0 0 0 1px rgba(var(--color-black-rgb), 0.05);
 }
 
 .sparrows-closet__content {
@@ -81,7 +81,7 @@
 .sparrows-closet__title {
   font-size: clamp(2.5rem, 4vw, 3.5rem);
   font-weight: 800;
-  color: #DC2626;
+  color: var(--color-error);
   margin-bottom: 2rem;
   letter-spacing: -0.02em;
   line-height: 1.2;
@@ -90,28 +90,28 @@
 .sparrows-closet__text {
   font-size: clamp(1.125rem, 1.3vw, 1.25rem);
   line-height: 1.8;
-  color: #4a4a4a;
+  color: var(--color-gray-800);
   margin-bottom: 1.75rem;
   font-weight: 400;
   letter-spacing: -0.01em;
 }
 
 .sparrows-closet__button {
-  background: #DC2626 !important;
-  color: #FFFFFF !important;
+  background: var(--color-error-dark) !important;
+  color: var(--color-white) !important;
   border: none !important;
 }
 
 .sparrows-closet__button:hover {
-  background: #B91C1C !important;
+  background: var(--color-error-dark) !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3) !important;
+  box-shadow: 0 4px 16px rgba(var(--color-error-rgb), 0.3) !important;
 }
 
 .sparrows-closet__cta {
   font-size: clamp(1rem, 1.2vw, 1.125rem);
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin-bottom: 2rem;
   letter-spacing: -0.01em;
 }
@@ -132,17 +132,29 @@
   }
 }
 
-/* Layout 2: Text Left, Image Right */
+/* Layout 2: Feature Panel — image leads, copy sits on a branded card */
 .sparrows-closet--layout-2 .sparrows-closet__container {
-  grid-template-columns: 1fr 1fr;
-}
-
-.sparrows-closet--layout-2 .sparrows-closet__content {
-  order: 1;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 4rem;
 }
 
 .sparrows-closet--layout-2 .sparrows-closet__image {
+  order: 1;
+}
+
+.sparrows-closet--layout-2 .sparrows-closet__image img,
+.sparrows-closet--layout-2 .sparrows-closet__image .image-placeholder {
+  aspect-ratio: 3/4;
+}
+
+.sparrows-closet--layout-2 .sparrows-closet__content {
   order: 2;
+  padding: 2.75rem;
+  background: var(--color-white);
+  border: 1px solid rgba(var(--color-error-rgb), 0.18);
+  border-left: 5px solid var(--color-error-dark);
+  border-radius: 1.25rem;
+  box-shadow: 0 24px 60px -28px rgba(var(--color-black-rgb), 0.25);
 }
 
 /* Layout 3: Centered Content with Image Background */
@@ -173,7 +185,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.85) 0%, rgba(185, 28, 28, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(var(--color-error-rgb), 0.85) 0%, rgba(var(--color-error-dark-rgb), 0.9) 100%);
 }
 
 .sparrows-closet--layout-3 .sparrows-closet__container {
@@ -186,10 +198,10 @@
 .sparrows-closet--layout-3 .sparrows-closet__content--centered {
   max-width: 800px;
   margin: 0 auto;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(var(--color-white-rgb), 0.95);
   padding: 3rem;
   border-radius: 1.5rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(var(--color-black-rgb), 0.3);
 }
 
 .sparrows-closet--layout-3 .sparrows-closet__title--centered {
