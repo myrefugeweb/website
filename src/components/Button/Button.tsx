@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import './Button.css';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'text';
@@ -28,29 +27,20 @@ export const Button: React.FC<ButtonProps> = ({
   const sizeClass = `button--${size}`;
   const widthClass = fullWidth ? 'button--full-width' : '';
   const combinedClass = `${baseClass} ${variantClass} ${sizeClass} ${widthClass} ${className}`.trim();
-  
-  // Filter out props that might conflict with framer-motion
-  const safeProps = Object.fromEntries(
-    Object.entries(props).filter(([key]) => 
-      !key.startsWith('onDrag') && 
-      !key.startsWith('onAnimation') &&
-      !key.startsWith('onTransition')
-    )
-  );
-  
+
+  // Hover/press motion is handled entirely in CSS (see Button.css + motion
+  // tokens) so it stays consistent with every other interactive element and
+  // avoids inline transform styles overriding the shared :hover lift.
   return (
-    <motion.button
+    <button
       className={combinedClass}
-      whileHover={{ scale: 1 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.15, ease: 'easeOut' }}
       onClick={onClick}
       disabled={disabled}
       type={type}
-      {...safeProps}
+      {...props}
     >
       {children}
-    </motion.button>
+    </button>
   );
 };
 

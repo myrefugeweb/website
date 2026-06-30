@@ -88,4 +88,43 @@
   /* ===== Off-brand gradient (flagged for review — not part of brand palette) ===== */
   --color-gradient-purple-a: #667eea;
   --color-gradient-purple-b: #764ba2;
+
+  /* ===== Layout ===== */
+  /* Shared max content width for the header, footer, and all public sections.
+   * Keeping every section bound to the same token guarantees their edges line
+   * up vertically and lets the whole site breathe consistently on wide screens.
+   * The value scales up at larger breakpoints (see media queries below). */
+  --content-width: 1400px;
+}
+
+/* Let content use more of large/ultrawide displays while keeping text-heavy
+ * inner blocks (which set their own narrower max-widths) readable. */
+@media (min-width: 1920px) {
+  :root {
+    --content-width: 1600px;
+  }
+}
+
+@media (min-width: 2400px) {
+  :root {
+    --content-width: 1760px;
+  }
+}
+
+/* ===== Motion ===== *
+ * Single source of truth for interactive hover/press animation so every
+ * button and link across the site shares the same subtle, branded feel.
+ * Consume these instead of hardcoding durations, easings, or lift distances. */
+:root {
+  --motion-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-fast: 180ms;
+  /* Subtle upward "lift" applied on hover for interactive elements. */
+  --hover-lift: -2px;
+}
+
+/* Honor users who prefer reduced motion: keep state changes, drop movement. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --hover-lift: 0px;
+  }
 }

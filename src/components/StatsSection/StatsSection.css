@@ -6,8 +6,9 @@
 }
 
 .stats-section__container {
-  max-width: 1200px;
+  max-width: var(--content-width);
   margin: 0 auto;
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;

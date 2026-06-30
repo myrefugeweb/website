@@ -11,7 +11,7 @@
 }
 
 .hero__container {
-  max-width: 1400px;
+  max-width: var(--content-width);
   margin: 0 auto;
   width: 100%;
   position: relative;
@@ -89,7 +89,11 @@
   font-size: 1rem;
   font-weight: 600;
   border-radius: 0.5rem;
-  transition: all 0.3s ease;
+  transition: transform var(--motion-fast) var(--motion-ease),
+    box-shadow var(--motion-fast) var(--motion-ease),
+    background var(--motion-fast) var(--motion-ease),
+    color var(--motion-fast) var(--motion-ease),
+    border-color var(--motion-fast) var(--motion-ease);
 }
 
 .hero__donate-btn {
@@ -100,8 +104,11 @@
 
 .hero__donate-btn:hover {
   background: var(--color-primary-400);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.25);
+  transform: translateY(var(--hover-lift));
+}
+
+.hero__donate-btn:active {
+  transform: translateY(0);
 }
 
 .hero__learn-btn {
@@ -113,7 +120,11 @@
 .hero__learn-btn:hover {
   background: var(--color-secondary-700);
   color: var(--color-on-secondary);
-  transform: translateY(-1px);
+  transform: translateY(var(--hover-lift));
+}
+
+.hero__learn-btn:active {
+  transform: translateY(0);
 }
 
 .hero__visual {
@@ -249,6 +260,7 @@
 .hero--layout-2 .hero__learn-btn:hover {
   background: rgba(var(--color-white-rgb), 0.2);
   border-color: rgba(var(--color-white-rgb), 0.5);
+  transform: translateY(var(--hover-lift));
 }
 
 /* Layout 3: Image Left, Text Right */

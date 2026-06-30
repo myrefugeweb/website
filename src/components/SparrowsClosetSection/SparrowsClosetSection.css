@@ -19,8 +19,9 @@
 }
 
 .sparrows-closet__container {
-  max-width: 1400px;
+  max-width: var(--content-width);
   margin: 0 auto;
+  width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6rem;
@@ -104,8 +105,11 @@
 
 .sparrows-closet__button:hover {
   background: var(--color-error-dark) !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(var(--color-error-rgb), 0.3) !important;
+  transform: translateY(var(--hover-lift));
+}
+
+.sparrows-closet__button:active {
+  transform: translateY(0);
 }
 
 .sparrows-closet__cta {

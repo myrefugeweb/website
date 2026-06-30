@@ -21,7 +21,7 @@
 }
 
 .footer__donate-container {
-  max-width: 1280px;
+  max-width: var(--content-width);
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
@@ -48,7 +48,7 @@
 }
 
 .footer__container {
-  max-width: 1280px;
+  max-width: var(--content-width);
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -129,7 +129,7 @@
 }
 
 .footer__bottom {
-  max-width: 1280px;
+  max-width: var(--content-width);
   margin: 0 auto;
   padding-top: 2rem;
   border-top: 1px solid rgba(var(--color-white-rgb), 0.1);
